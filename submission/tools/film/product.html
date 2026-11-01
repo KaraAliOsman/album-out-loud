@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Album Out Loud: product images</title>
+<style>
+:root{--bg:#060607;--text:#F4F1EA;--mute:#8B8F98;--fam:#F1C27D;--famD:#B9852F;--mach:#9AA3B2;--blue:#7FA6E6;
+--sans:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;--tx:"Segoe UI Variable Text","Segoe UI",sans-serif;--serif:"Sitka Display",Georgia,serif;--mono:"Cascadia Mono",Consolas,monospace}
+*{box-sizing:border-box}html,body{margin:0;background:#000}
+.s{width:1920px;height:1280px;position:relative;overflow:hidden;background:radial-gradient(120% 90% at 50% 40%,#111216 0%,#060607 70%);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;display:none}
+.on{display:block}
+.mono{font-family:var(--mono);text-transform:uppercase;letter-spacing:.16em;font-size:17px;font-weight:500}
+.badge{position:absolute;top:44px;right:60px;color:rgba(244,241,234,.42)}
+.kick{position:absolute;left:120px;top:110px;color:var(--mute)}
+.h{position:absolute;left:120px;top:150px;font:700 76px/1.02 var(--sans);letter-spacing:-.04em;width:620px}
+.h em{font-style:normal;color:var(--fam)}
+.p{position:absolute;left:120px;font:450 28px/1.4 var(--tx);color:rgba(244,241,234,.72);width:600px}
+.win{position:absolute;border-radius:28px;background:#121318;border:1px solid rgba(255,255,255,.09);box-shadow:0 50px 120px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.06);overflow:hidden}
+.bar{height:58px;display:flex;align-items:center;gap:10px;padding:0 22px;border-bottom:1px solid rgba(255,255,255,.07);color:var(--mute)}
+.bar i{width:12px;height:12px;border-radius:50%;background:#2b2d33;display:block}
+.bar span{margin-left:14px}
+/* chat */
+.chat{padding:26px 30px;display:flex;flex-direction:column;gap:16px}
+.b{max-width:86%;padding:16px 20px;border-radius:22px;font:450 21px/1.42 var(--tx)}
+.me{align-self:flex-end;background:#2a2d36;border-bottom-right-radius:8px}
+.ai{align-self:flex-start;background:#191b21;border:1px solid rgba(255,255,255,.07);border-bottom-left-radius:8px;white-space:pre-wrap}
+.ai b{color:var(--fam);font-weight:600}
+.who{font:500 13px var(--mono);letter-spacing:.16em;color:var(--mute);margin-bottom:6px;text-transform:uppercase}
+.ok{color:#9fd8a8}
+/* letter */
+.txt{padding:30px 38px;font:400 22px/1.62 var(--mono);color:rgba(244,241,234,.86);white-space:pre-wrap}
+.lab{color:var(--text);font-weight:700}.lf{color:var(--fam);font-weight:700}.la{color:var(--mach);font-weight:700}
+.dim{color:rgba(244,241,234,.4)}
+.cur{background:rgba(241,194,125,.14);outline:2px solid var(--fam);border-radius:6px}
+/* terminal */
+.term{padding:30px 38px;font:400 22px/1.6 var(--mono);color:#d8dbe2;white-space:pre}
+.g{color:#9fd8a8}.y{color:var(--fam)}.c{color:var(--mute)}
+.note{position:absolute;left:120px;bottom:70px;color:rgba(244,241,234,.38)}
+.chip{display:inline-flex;align-items:center;gap:10px;padding:9px 16px;border-radius:999px;font:500 15px var(--mono);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.cf{background:var(--fam);color:#1d1405}.cm{border:1.5px solid rgba(244,241,234,.3);color:rgba(244,241,234,.8)}.ca{border:1.5px dashed rgba(154,163,178,.75);color:var(--mach)}
+.legend{position:absolute;left:120px;display:flex;flex-direction:column;gap:14px}
+.tree{padding:30px 38px;font:400 23px/1.75 var(--mono);color:#d8dbe2;white-space:pre}
+</style></head><body>
+
+<!-- 1: the chat -->
+<div class="s" id="p1">
+  <div class="badge mono">Illustration · text from SKILL.md · not a NAS screenshot</div>
+  <div class="kick mono">The helper’s side · in Uliya</div>
+  <div class="h">One request. <em>One approval.</em></div>
+  <div class="p" style="top:340px">A sighted helper asks Uliya for a letter. The Skill shows its setup, previews the whole letter, takes family notes by photo number, and saves one text file only after the helper says save.</div>
+  <div class="legend" style="top:580px">
+    <span class="chip cm">● Setup before anything runs</span>
+    <span class="chip cf">● Family notes by photo number</span>
+    <span class="chip cm">● Nothing saved before “save”</span>
+    <span class="chip cm">● Read back after saving</span>
+  </div>
+  <div class="win" style="left:800px;top:110px;width:1000px;height:1080px">
+    <div class="bar"><i></i><i></i><i></i><span class="mono">Uliya · Album Out Loud</span></div>
+    <div class="chat">
+      <div class="b me">Album Out Loud: a listening letter from Sample family album for Dad, in English.</div>
+      <div class="b ai"><div class="who">Album Out Loud</div><b>Album Out Loud setup.</b> Reply go, or change any line.
+1. Album or photo folder: Sample family album
+2. For: Dad, in English
+3. Detail: brief, one AI sentence per photo.
+4. Photos: 8
+5. Family notes signed by: Ana
+6. Letter: since the last letter</div>
+      <div class="b me">go</div>
+      <div class="b ai"><div class="who">Album Out Loud</div><b>Preview:</b> 11 photos qualified, 8 chosen, 0 not described (none). <b>Nothing is saved yet.</b>
+Dad, here are 8 new photos from Sample family album, chosen by Ana. …
+Send all notes in one message, by photo number. Say save when the letter is ready.</div>
+      <div class="b me">2: your birthday cake from the corner bakery, chocolate as always.<br>save</div>
+      <div class="b ai"><div class="who">Album Out Loud</div><span class="ok">Saved and checked:</span> Listening letter - Sample family album - 2026-09-12 18-30.txt, 8 photos, 0 not described.</div>
+    </div>
+  </div>
+  <div class="note mono">Chat text follows the Skill’s own message templates. Counts and file name are illustrative.</div>
+</div>
+
+<!-- 2: the letter as the listener receives it -->
+<div class="s" id="p2">
+  <div class="badge mono">The real sample letter · plain text · read by any screen reader</div>
+  <div class="kick mono">The listener’s side</div>
+  <div class="h">Every line says <em>where it came from.</em></div>
+  <div class="p" style="top:420px">A plain-text file, no formatting a screen reader would stumble on. Each photo starts with its number. Each line starts with its source, and the family speaks before the computer guesses.</div>
+  <div class="legend" style="top:680px">
+    <span class="chip cm">● When · camera clock</span>
+    <span class="chip cm">● Where · photo library</span>
+    <span class="chip cf">● Family says · the family</span>
+    <span class="chip ca">○ AI guess · may be wrong</span>
+  </div>
+  <div class="win" style="left:800px;top:110px;width:1000px;height:1080px">
+    <div class="bar"><i></i><i></i><i></i><span class="mono">Listening letter - Sample family album.txt</span></div>
+<div class="txt"><span class="dim">Dad, here are 8 new photos from Sample family album, chosen by Ana.
+How to listen: Each photo starts with its number…</span>
+
+<span class="lab">Photo 1 of 8.</span>
+<span class="lab">When:</span> copied or scanned on 3 May 2026; the photo itself may be older.
+<span class="lf">Family says:</span> Grandma Rosa holding you, the winter you were born.
+<span class="la">AI guess:</span> In black and white, an adult holds a baby.
+
+<span class="cur"><span class="lab">Photo 2 of 8.</span></span>
+<span class="lab">When:</span> 14 June 2026, 7:52 in the evening.
+<span class="lab">Where:</span> Valparaíso.
+<span class="lf">Family says:</span> your birthday cake from the corner bakery, chocolate as always.
+<span class="la">AI guess:</span> A slice of chocolate cake sits on a white plate with a yellow rim.
+<span class="la">Words in the photo, AI reading:</span> Happy Birthday.
+
+<span class="lab">Photo 4 of 8.</span>
+<span class="lab">When:</span> 2 August 2026, 6:40 in the evening.
+<span class="lab">Where:</span> Algarrobo.
+<span class="lf">Family says:</span> Marta and Leo with Luna, after the long walk on the beach.
+<span class="la">AI guess:</span> Two adults and a dog sit on a bench facing the sea.</div>
+  </div>
+  <div class="note mono">Excerpt of submission/assets/sample_letter.txt (synthetic family, CC0 photos). Colour added here for sighted readers only.</div>
+</div>
+
+<!-- 3: the package passes the official checker -->
+<div class="s" id="p3">
+  <div class="badge mono">Real output · official checker of the Uliya Skill kit</div>
+  <div class="kick mono">The Skill package</div>
+  <div class="h">Markdown only. <em>0 diagnostics.</em></div>
+  <div class="p" style="top:340px">The whole Skill is SKILL.md and six reference files. It passes the official static checker with no errors, warnings or notes, and the ZIP holds exactly these seven files.</div>
+  <div class="win" style="left:120px;top:640px;width:620px;height:500px">
+    <div class="bar"><i></i><i></i><i></i><span class="mono">album-out-loud.zip</span></div>
+<div class="tree">album-out-loud/
+├─ SKILL.md
+└─ references/
+   ├─ capability-map.md
+   ├─ disclosure.md
+   ├─ filled-instructions.md
+   ├─ letter-format.md
+   ├─ quick-test.md
+   └─ vision-prompts.md</div>
+  </div>
+  <div class="win" style="left:800px;top:110px;width:1000px;height:1080px">
+    <div class="bar"><i></i><i></i><i></i><span class="mono">Terminal</span></div>
+<div class="term"><span class="c">$</span> node refs/uliya-skill-kit/scripts/check-skill.mjs \
+    app/album-out-loud
+{
+  "checkFormatVersion": "2.0.0",
+  "status": <span class="g">"static-pass"</span>,
+  "target": { "skillName": "album-out-loud" },
+  "catalog": { "checkedVersion": "2.0.0" },
+  "files": [ <span class="c">… 7 files, each with its sha256 …</span> ],
+  "summary": { <span class="c">…</span> },
+  "diagnostics": <span class="g">[]</span>
+}
+
+<span class="c">$</span> python -I app/tests/static_suite.py
+<span class="c">…</span>
+<span class="y">STATIC: 58 / 58</span>
+
+<span class="c">$</span> sha256sum album-out-loud.zip
+bf9e607f88bff49813f1b7b90c300652b020f2d9cd12b5cd792879c80d2fe9e4</div>
+  </div>
+  <div class="note mono">Not yet run on a UGREEN NAS. That is the plan for the finalist test day.</div>
+</div>
+
+<script>
+const p = new URLSearchParams(location.search).get('p') || '1';
+document.getElementById('p' + p).classList.add('on');
+document.fonts.ready.then(() => { window.READY = true; });
+</script>
+</body></html>
