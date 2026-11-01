@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Album Out Loud — In the dark (concept film)</title>
+<style>
+:root {
+  --bg: #060607; --text: #F4F1EA; --mute: #8B8F98; --faint: #2A2C31;
+  --fam: #F1C27D; --famD: #B9852F; --mach: #9AA3B2; --blue: #7FA6E6;
+  --sans: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --text-f: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --serif: "Sitka Display", "Sitka Text", Georgia, serif;
+  --mono: "Cascadia Mono", Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #000; }
+#stage { width: 1920px; height: 1080px; position: relative; overflow: hidden; background: var(--bg); color: var(--text);
+  font-family: var(--sans); -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; }
+.L { position: absolute; will-change: transform, opacity, filter; }
+.mono { font-family: var(--mono); text-transform: uppercase; letter-spacing: .16em; font-size: 17px; font-weight: 500; }
+#vignette { position: absolute; inset: 0; z-index: 80; pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 45%, rgba(0,0,0,0) 55%, rgba(0,0,0,.55) 100%); }
+#grain { position: absolute; inset: -50px; z-index: 81; pointer-events: none; opacity: .055; mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='256' height='256'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 -.2'/></filter><rect width='256' height='256' filter='url(%23n)'/></svg>"); }
+#badge { position: absolute; top: 42px; right: 60px; z-index: 90; color: rgba(244,241,234,.42); }
+#cap { position: absolute; left: 120px; bottom: 84px; z-index: 85; width: 1280px; font: 500 34px/1.32 var(--text-f); letter-spacing: -.004em;
+  color: rgba(244,241,234,.92); text-shadow: 0 2px 18px rgba(0,0,0,.65); }
+#cap span { display: inline-block; white-space: pre; transition: none; }
+#capbar { display: none; }
+#cap::before { content: ''; display: block; width: 34px; height: 2px; background: var(--fam); margin-bottom: 18px; }
+
+/* the screen reader */
+.sr { font-family: var(--mono); color: var(--text); }
+.w { display: inline-block; white-space: pre; }
+#srtag { left: 120px; top: 120px; color: var(--mute); display: flex; align-items: center; gap: 16px; }
+#srtag .wave { display: flex; gap: 4px; align-items: center; height: 26px; }
+#srtag .wave i { display: block; width: 3px; height: 4px; border-radius: 2px; background: var(--mute); }
+#caret { left: 958px; top: 500px; width: 3px; height: 80px; background: var(--text); border-radius: 2px; }
+#sr1 { left: 0; width: 1920px; top: 470px; text-align: center; font-size: 92px; letter-spacing: -.01em; }
+#sr2wrap { left: 0; width: 1920px; top: 430px; text-align: center; }
+#sr2 { font-size: 64px; color: var(--mach); letter-spacing: -.01em; }
+#sr2 .w { border-bottom: 3px dashed rgba(154,163,178,0); padding-bottom: 6px; }
+#chipAI { left: 0; width: 1920px; top: 360px; display: flex; justify-content: center; }
+.chip { display: inline-flex; align-items: center; gap: 12px; padding: 11px 20px 11px 16px; border-radius: 999px; white-space: nowrap; }
+.chip b { width: 9px; height: 9px; border-radius: 50%; display: block; }
+.chip.ai { border: 1.5px dashed rgba(154,163,178,.75); color: var(--mach); }
+.chip.ai b { border: 1.5px dashed var(--mach); }
+.chip.fam { background: var(--fam); color: #1d1405; }
+.chip.fam b { background: #1d1405; }
+.chip.meta { border: 1.5px solid rgba(244,241,234,.28); color: rgba(244,241,234,.8); }
+.chip.meta b { background: rgba(244,241,234,.8); }
+.q { font-family: var(--serif); font-style: italic; color: var(--fam); font-size: 62px; font-weight: 400; letter-spacing: -.01em; }
+
+/* the letter */
+#letter { left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 1180px 540px; }
+.ln { position: absolute; left: 640px; width: 1120px; }
+.ln .w { color: var(--text); }
+.ln.l0 { font: 650 58px/1.1 var(--sans); letter-spacing: -.025em; }
+.ln.l1, .ln.l2 { font: 450 44px/1.25 var(--sans); letter-spacing: -.012em; }
+.ln.l3 { font: 400 54px/1.2 var(--serif); letter-spacing: -.006em; }
+.ln.l3 .w { color: var(--fam); }
+.ln.l4, .ln.l5 { font: 400 32px/1.45 var(--mono); letter-spacing: -.01em; }
+.ln.l4 .w, .ln.l5 .w { color: var(--mach); }
+.gut { position: absolute; right: 1340px; }
+#ring { border: 2px solid var(--fam); border-radius: 18px; box-shadow: 0 0 0 6px rgba(241,194,125,.12), 0 0 40px rgba(241,194,125,.18); z-index: 4; }
+
+/* title */
+#title { left: 120px; top: 380px; font: 700 196px/0.95 var(--sans); letter-spacing: -.045em; white-space: nowrap; }
+#title span { display: inline-block; }
+#titleSub { left: 128px; top: 610px; color: var(--mute); }
+
+/* how */
+.glass { background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.1); border-radius: 30px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 30px 80px rgba(0,0,0,.5); }
+#ask { left: 120px; top: 300px; width: 470px; padding: 30px 34px 34px; }
+#ask .who { color: var(--mute); margin-bottom: 16px; }
+#ask .msg { font: 500 36px/1.28 var(--text-f); letter-spacing: -.01em; }
+#nas { left: 770px; top: 250px; width: 300px; height: 420px; }
+#nas svg { width: 100%; height: 100%; overflow: visible; }
+#nasLbl { left: 620px; top: 700px; width: 600px; white-space: nowrap; text-align: center; color: var(--mute); }
+.ex { left: 620px; width: 600px; text-align: center; white-space: nowrap; color: rgba(244,241,234,.7); }
+.thumb { width: 168px; height: 168px; border-radius: 22px; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,.6); }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tag { color: var(--mach); border: 1.5px dashed rgba(154,163,178,.7); border-radius: 999px; padding: 6px 12px; font-size: 13px; }
+.note { font: 400 30px/1.25 var(--serif); color: var(--fam); width: 360px; }
+.note small { display: block; font: 500 14px var(--mono); letter-spacing: .16em; color: var(--famD); margin-top: 10px; text-transform: uppercase; }
+#save { left: 1440px; top: 840px; height: 76px; padding: 0 34px 0 26px; border-radius: 999px; background: var(--fam); color: #1d1405;
+  display: flex; align-items: center; gap: 14px; font: 650 30px var(--sans); letter-spacing: -.01em; }
+#save svg { width: 34px; height: 34px; }
+#path { left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+
+/* trust */
+#idwrap { left: 610px; top: 200px; width: 700px; height: 525px; border-radius: 26px; overflow: hidden; box-shadow: 0 40px 100px rgba(0,0,0,.7); }
+#idwrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+#stamp { left: 0; top: 0; width: 700px; height: 525px; display: flex; align-items: center; justify-content: center; }
+#stamp div { border: 2px solid var(--text); color: var(--text); padding: 18px 30px; border-radius: 14px; font-size: 30px; background: rgba(6,6,7,.35); }
+#idlist { left: 0; width: 1920px; top: 780px; text-align: center; color: var(--mute); }
+#face { left: 640px; top: 170px; width: 640px; height: 640px; }
+#nameRow { left: 0; width: 1920px; top: 760px; text-align: center; }
+#nameRow .lab { color: var(--mute); }
+#nameRow .val { font: 400 58px var(--serif); color: var(--fam); }
+#loop { left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+#lq { left: 140px; top: 330px; width: 520px; padding: 28px 32px; border-radius: 28px; border: 1.5px dashed rgba(127,166,230,.8); }
+#lq .who { color: var(--blue); margin-bottom: 14px; }
+#lq .t { font: 600 46px/1.15 var(--sans); letter-spacing: -.02em; }
+#lf { left: 1330px; top: 300px; width: 450px; text-align: center; }
+#lf .dot { width: 150px; height: 150px; margin: 0 auto 22px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #F7D39A, #C98A2E); box-shadow: 0 0 80px rgba(241,194,125,.35); }
+#la { left: 520px; top: 600px; width: 880px; text-align: center; }
+#la .t { font: 400 50px/1.2 var(--serif); color: var(--fam); }
+#la .mono { color: var(--famD); margin-top: 18px; }
+
+/* status */
+.st { left: 120px; display: flex; align-items: baseline; gap: 44px; }
+.st .n { font: 700 150px/1 var(--sans); letter-spacing: -.05em; font-variant-numeric: tabular-nums; min-width: 420px; }
+.st .d { font: 450 40px/1.25 var(--sans); letter-spacing: -.015em; color: rgba(244,241,234,.86); }
+.st .d small { display: block; margin-top: 10px; color: var(--mute); }
+.st.next .n { color: var(--fam); }
+
+/* reveal */
+#photo { left: 0; top: 0; width: 1920px; height: 1080px; }
+#photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+#photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(6,6,7,.78) 0%, rgba(6,6,7,0) 34%); }
+#photoShade { left: 0; top: 0; width: 1920px; height: 1080px; background: linear-gradient(90deg, rgba(6,6,7,.86) 0%, rgba(6,6,7,.55) 45%, rgba(6,6,7,.15) 100%); }
+#pnum { left: 0; width: 1920px; top: 516px; text-align: center; color: var(--mute); }
+#famq { left: 120px; top: 360px; width: 900px; }
+#famq .t { font: 400 66px/1.16 var(--serif); color: var(--fam); letter-spacing: -.01em; }
+#famq .mono { color: var(--famD); margin-top: 28px; }
+#endT { left: 0; width: 1920px; top: 400px; text-align: center; font: 700 150px/1 var(--sans); letter-spacing: -.045em; }
+#endT span { display: inline-block; }
+#endS { left: 0; width: 1920px; top: 590px; text-align: center; font: 400 52px var(--serif); font-style: italic; color: var(--fam); }
+#endM { left: 0; width: 1920px; top: 700px; text-align: center; color: var(--mute); }
+</style>
+<script src="cues.js"></script>
+</head>
+<body>
+<div id="stage">
+  <div id="badge" class="mono">Concept film · not recorded on a NAS</div>
+
+  <!-- act 1: what an album sounds like today -->
+  <div id="caret" class="L"></div>
+  <div id="srtag" class="L mono"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></svg><span>Screen reader</span><span class="wave" id="srwave"></span></div>
+  <div id="sr1" class="L sr"></div>
+  <div id="chipAI" class="L mono"><span class="chip ai"><b></b>A computer · may be wrong</span></div>
+  <div id="sr2wrap" class="L sr"><span id="sr2"></span></div>
+  <div id="q1" class="L q" style="left:250px;top:700px">Whose cake?</div>
+  <div id="q2" class="L q" style="left:790px;top:760px">Which birthday?</div>
+  <div id="q3" class="L q" style="left:1330px;top:700px">Why did it matter?</div>
+
+  <!-- act 2: the letter -->
+  <div id="letter" class="L"><div id="ring" class="L"></div></div>
+
+  <!-- title -->
+  <div id="title" class="L"></div>
+  <div id="titleSub" class="L mono">A Skill for UGREEN AI NAS · Bring memories to life</div>
+
+  <!-- act 3: how -->
+  <svg id="path" class="L" viewBox="0 0 1920 1080"></svg>
+  <div id="ask" class="L glass"><div class="who mono">The helper · to Uliya</div><div class="msg">Make a listening letter from Grandma’s birthday album.</div></div>
+  <div id="nas" class="L"><svg viewBox="0 0 300 420" fill="none">
+    <rect x="1.5" y="1.5" width="297" height="417" rx="34" stroke="rgba(244,241,234,.5)" stroke-width="2.5" class="draw"/>
+    <rect x="44" y="70" width="212" height="56" rx="12" stroke="rgba(244,241,234,.28)" stroke-width="2" class="draw"/>
+    <rect x="44" y="146" width="212" height="56" rx="12" stroke="rgba(244,241,234,.28)" stroke-width="2" class="draw"/>
+    <circle id="led" cx="150" cy="350" r="9" fill="#F1C27D"/>
+  </svg></div>
+  <div id="nasLbl" class="L mono">UGREEN AI NAS · photos never leave home</div>
+  <div id="ex1" class="L ex mono" style="top:750px">photo-agent · finds the album</div>
+  <div id="ex2" class="L ex mono" style="top:790px">vision model · a short guess</div>
+  <div id="ex3" class="L ex mono" style="top:830px">file-agent · saves once</div>
+  <div id="thumbs"></div>
+  <div id="save" class="L"><svg viewBox="0 0 34 34" fill="none"><circle cx="17" cy="17" r="15" stroke="#1d1405" stroke-width="2.5" id="sc"/><path d="M10 17.5l5 5 9-10" stroke="#1d1405" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" id="sk"/></svg><span id="saveT">Save</span></div>
+
+  <!-- act 4: trust -->
+  <div id="idwrap" class="L"><img id="idimg" src="img/22_synthetic_id_card.jpg" alt=""></div>
+  <div id="stamp" class="L mono" style="left:610px;top:200px"><div>Not described</div></div>
+  <div id="idlist" class="L mono">ID cards · chats · medical papers</div>
+  <svg id="face" class="L" viewBox="0 0 640 640" fill="none">
+    <circle cx="320" cy="250" r="118" stroke="rgba(244,241,234,.55)" stroke-width="3" class="draw"/>
+    <path d="M110 600c22-130 110-196 210-196s188 66 210 196" stroke="rgba(244,241,234,.55)" stroke-width="3" class="draw"/>
+    <g id="fbox" stroke="#9AA3B2" stroke-width="3" stroke-dasharray="14 10"><rect x="170" y="100" width="300" height="300" rx="10"/></g>
+    <path id="fx" d="M170 100L470 400M470 100L170 400" stroke="#9AA3B2" stroke-width="3" class="draw"/>
+  </svg>
+  <div id="nameRow" class="L"><div class="lab mono">Name</div><div class="val" id="nameV">Aunt Clara <span style="font:500 18px var(--mono);letter-spacing:.16em;color:var(--famD);vertical-align:middle;margin-left:18px">· FROM THE FAMILY</span></div></div>
+  <svg id="loop" class="L" viewBox="0 0 1920 1080" fill="none">
+    <path id="arc1" d="M660 420 C 900 180, 1180 180, 1400 330" stroke="rgba(127,166,230,.6)" stroke-width="2.5" stroke-dasharray="8 10"/>
+    <path id="arc2" d="M1555 500 C 1555 610, 1500 655, 1420 660" stroke="rgba(241,194,125,.7)" stroke-width="2.5"/>
+    <circle id="dot1" r="9" fill="#7FA6E6"/><circle id="dot2" r="9" fill="#F1C27D"/>
+  </svg>
+  <div id="lq" class="L"><div class="who mono">She asks</div><div class="t">Who is holding the baby?</div></div>
+  <div id="lf" class="L"><div class="dot"></div><div class="mono" style="color:var(--fam)">The family</div></div>
+  <div id="la" class="L"><div class="t">“That is your sister Clara, the summer she turned nineteen.”</div><div class="mono">In the next letter</div></div>
+
+  <!-- act 5: status -->
+  <div id="st1" class="L st" style="top:200px"><div class="n">0</div><div class="d">diagnostics from the official checker<small class="mono">The Skill package, as submitted</small></div></div>
+  <div id="st2" class="L st" style="top:440px"><div class="n"><span id="cnt">0</span>/24</div><div class="d">dry runs clean, with a model playing Uliya<small class="mono">Stand-in models · CC0 images · a smoke test</small></div></div>
+  <div id="st3" class="L st next" style="top:680px"><div class="n">Next</div><div class="d">a real UGREEN AI NAS<small class="mono">Timings · and blind listeners</small></div></div>
+
+  <!-- act 6: reveal -->
+  <div id="pnum" class="L mono">Photo 2 of 8</div>
+  <div id="photo" class="L"><img src="img/12_cake_happy_birthday.jpg" alt=""></div>
+  <div id="photoShade" class="L"></div>
+  <div id="famq" class="L"><div class="t">“Your birthday cake from the corner bakery, chocolate as always.”</div><div class="mono">The family · Ana</div></div>
+  <div id="endT" class="L"></div>
+  <div id="endS" class="L">Every line says where it came from.</div>
+  <div id="endM" class="L mono">A Skill for UGREEN AI NAS · Bring memories to life</div>
+
+  <div id="capbar"></div>
+  <div id="cap"></div>
+  <div id="vignette"></div>
+  <div id="grain"></div>
+</div>
+
+<script>
+const SUBS_ON = new URLSearchParams(location.search).get('subs') !== '0';
+const $ = s => document.querySelector(s);
+const C = {}; for (const c of window.CUES) C[c.id] = c;
+const TOTAL = window.TOTAL_FROM_CUES;
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+// strong ease-out / in-out (Emil's curves) as functions
+function bez(x1, y1, x2, y2) { return x => { if (x <= 0) return 0; if (x >= 1) return 1; let lo = 0, hi = 1, t = x;
+  for (let i = 0; i < 28; i++) { t = (lo + hi) / 2; const cx = 3 * x1 * t * (1 - t) ** 2 + 3 * x2 * t * t * (1 - t) + t ** 3; if (cx < x) lo = t; else hi = t; }
+  return 3 * y1 * t * (1 - t) ** 2 + 3 * y2 * t * t * (1 - t) + t ** 3; }; }
+const EO = bez(0.23, 1, 0.32, 1), EIO = bez(0.77, 0, 0.175, 1);
+// Apple-style spring (damping ratio z, response r): progress for time since start
+function spring(z, r) { const w = 2 * Math.PI / r; return t => { if (t <= 0) return 0; if (z >= 1) return 1 - Math.exp(-w * t) * (1 + w * t);
+  const wd = w * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w * t) * (Math.cos(wd * t) + (z * w / wd) * Math.sin(wd * t)); }; }
+const SP = spring(1, 0.6), SPB = spring(0.78, 0.55), SPF = spring(1, 0.38);
+const at = (id, f = 0) => C[id].t0 + (C[id].d) * f;     // a moment inside a cue
+const end = id => C[id].t1;
+
+// one call drives an element: enters at a (spring + blur), leaves at b
+function vis(el, t, a, b, o = {}) {
+  if (!el) return 0;
+  const { y = 24, x = 0, blur = 14, s = 0.985, sp = SP, out = 0.55, oy = -14, oblur = 10, max = 1 } = o;
+  const pin = clamp(sp(t - a), 0, 1.2), pout = b == null ? 0 : EO(clamp((t - b) / out));
+  const op = clamp(Math.min(1, (t - a) / 0.45) * clamp(pin)) * (1 - pout) * max;
+  if (op <= 0.001) { el.style.opacity = 0; el.style.visibility = 'hidden'; return 0; }
+  el.style.visibility = 'visible'; el.style.opacity = op;
+  el.style.transform = `translate(${x * (1 - pin)}px, ${y * (1 - pin) + oy * pout}px) scale(${lerp(s, 1, clamp(pin))})`;
+  const bl = blur * (1 - clamp(pin)) + oblur * pout; el.style.filter = bl > 0.05 ? `blur(${bl.toFixed(2)}px)` : 'none';
+  return op;
+}
+function el(tag, cls, html, parent) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; (parent || $('#stage')).appendChild(e); return e; }
+
+/* ---------- words: screen-reader cues carry real SAPI word timings ---------- */
+function wordsInto(container, text, offset = 0) {   // returns [{el, cp}]
+  const out = []; const re = /\S+\s*/g; let m;
+  while ((m = re.exec(text))) { const w = el('span', 'w', m[0], container); out.push({ el: w, cp: offset + m.index }); }
+  return out;
+}
+function srTimeFor(cue, cp) {  // time a character position is spoken
+  const ws = cue.words; let best = null;
+  for (const [tt, c] of ws) { if (c <= cp) best = tt; else break; }
+  return cue.t0 + (best == null ? 0 : best);
+}
+// narration captions: per-word timing estimated from length inside the real clip duration
+function narWords(cue) { const parts = cue.text.match(/\S+\s*/g); const wts = parts.map(p => 0.6 + p.trim().length * 0.12);
+  const sum = wts.reduce((a, b) => a + b, 0); let acc = 0; const lead = 0.15, span = cue.d - 0.35;
+  return parts.map((p, i) => { const s = cue.t0 + lead + span * acc / sum; acc += wts[i]; return [s, p]; }); }
+
+/* ---------- build ---------- */
+let SR1, SR2, LINES = [], LW = [], TITLE = [], ENDT = [], THUMBS = [], NOTES = [], TAGS = [], NARS = [];
+const bars = n => { const w = $('#srwave'); const a = []; for (let i = 0; i < n; i++) a.push(el('i', '', null, w)); return a; };
+let WAVE;
+function build() {
+  WAVE = bars(14);
+  SR1 = wordsInto($('#sr1'), C.sr1.text);
+  SR2 = wordsInto($('#sr2'), C.sr2.text);
+  // the letter: each line is an exact substring of the sr3 text, so SAPI char positions map onto it
+  const lines = [
+    ['Photo 2 of 8.', 'l0', null, 'Letter · photo 2'],
+    ['When: 14 June 2026, 7:52 in the evening.', 'l1', 'meta', 'Camera clock'],
+    ['Where: Valparaiso.', 'l2', 'meta', 'Photo library'],
+    ['Family says: your birthday cake from the corner bakery, chocolate as always.', 'l3', 'fam', 'The family · Ana'],
+    ['AI guess: a slice of chocolate cake on a white plate.', 'l4', 'ai', 'A computer · may be wrong'],
+    ['Words in the photo: Happy Birthday.', 'l5', 'ai', 'Text in photo · AI reading'],
+  ];
+  const tops = [170, 290, 370, 470, 650, 780];
+  lines.forEach(([txt, cls, kind, lab], i) => {
+    const off = C.sr3.text.indexOf(txt);
+    const ln = el('div', 'ln ' + cls, null, $('#letter')); ln.style.top = tops[i] + 'px';
+    const ws = wordsInto(ln, txt, off);
+    const g = el('div', 'gut mono', kind ? `<span class="chip ${kind}"><b></b>${lab}</span>` : `<span style="color:var(--mute)">${lab}</span>`, $('#letter'));
+    g.style.top = (tops[i] + (cls === 'l0' ? 10 : cls === 'l3' ? 8 : 4)) + 'px';
+    LINES.push({ ln, g, ws, off, len: txt.length, kind, start: srTimeFor(C.sr3, off) });
+    LW.push(...ws);
+  });
+  LINES.forEach((L, i) => L.end = i < LINES.length - 1 ? LINES[i + 1].start : end('sr3'));
+  // title
+  'Album Out Loud'.split('').forEach(ch => TITLE.push(el('span', '', ch === ' ' ? '&nbsp;' : ch, $('#title'))));
+  'Album Out Loud'.split('').forEach(ch => ENDT.push(el('span', '', ch === ' ' ? '&nbsp;' : ch, $('#endT'))));
+  // how: thumbnails fan out right of the NAS
+  const imgs = ['01_outdoor_party_table', '12_cake_happy_birthday', '03_picnic_park', '08_beach_dog', '19_mountain_lake'];
+  const guesses = ['a long table', 'a cake', 'a picnic', 'a dog, a beach', 'a lake'];
+  imgs.forEach((n, i) => {
+    const th = el('div', 'L thumb', `<img src="img/${n}.jpg" alt="">`); th.style.left = (1180 + (i % 3) * 196) + 'px'; th.style.top = (i < 3 ? 250 : 500) + 'px';
+    if (i >= 3) th.style.left = (1278 + (i - 3) * 196) + 'px';
+    THUMBS.push(th);
+    const tg = el('div', 'L tag mono', guesses[i]); tg.style.left = th.style.left; tg.style.top = (parseInt(th.style.top) + 180) + 'px'; tg.style.maxWidth = '180px'; tg.style.whiteSpace = 'nowrap'; tg.style.overflow = 'hidden'; tg.style.textOverflow = 'ellipsis'; TAGS.push(tg);
+  });
+  const notes = [['From the corner bakery, chocolate as always.', 'Ana · photo 2', 120, 560], ['Grandpa’s 80th. He sang louder than anyone.', 'Luis · photo 1', 120, 760]];
+  notes.forEach(([a, b, x, y]) => { const n = el('div', 'L note', `${a}<small>${b}</small>`); n.style.left = x + 'px'; n.style.top = y + 'px'; NOTES.push(n); });
+  // narration captions
+  for (const c of window.CUES) if (c.kind === 'nar') NARS.push({ c, w: narWords(c) });
+  // stroke-draw setup
+  document.querySelectorAll('.draw').forEach(p => { const L = p.getTotalLength ? p.getTotalLength() : 1000; p.dataset.len = L; p.style.strokeDasharray = L; p.style.strokeDashoffset = L; });
+}
+function draw(p, f) { p.style.strokeDashoffset = (1 - clamp(f)) * p.dataset.len; }
+function along(path, dot, f) { const L = path.getTotalLength(); const pt = path.getPointAtLength(L * clamp(f)); dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y); }
+const noise = (i, t) => (Math.sin(i * 12.9898 + t * 7.3) * 0.5 + Math.sin(i * 4.1 + t * 13.7) * 0.3 + Math.sin(t * 21.1 + i) * 0.2);
+
+/* ---------- per-frame ---------- */
+let capKey = '';
+function tick(t) {
+  // ===== act 1
+  const a1end = at('n4', 0.15);
+  vis($('#caret'), t, 0.5, at('sr1', 0) - 0.1, { y: 0, blur: 0, sp: SPF, out: 0.3 });
+  $('#caret').style.opacity *= (Math.floor(t * 1.6) % 2 === 0 ? 1 : 0.15);
+  const srOn = id => t >= C[id].t0 && t <= C[id].t1;
+  const anySr = srOn('sr1') || srOn('sr2') || srOn('sr3');
+  vis($('#srtag'), t, at('sr1', 0) - 0.4, a1end, { y: 10, blur: 6 });
+  WAVE.forEach((b, i) => { const amp = anySr ? 0.35 + 0.65 * Math.abs(noise(i, t)) : 0.12; b.style.height = (4 + 22 * amp) + 'px'; b.style.background = anySr ? 'var(--text)' : 'var(--mute)'; });
+  // sr1 karaoke: unread hidden, the word being read is bright
+  const s1 = vis($('#sr1'), t, at('sr1', 0) - 0.05, at('n2', 0) + 0.2, { y: 0, blur: 0, sp: SPF, oy: -30 });
+  if (s1) SR1.forEach(w => { const ts = srTimeFor(C.sr1, w.cp); const p = clamp((t - ts) / 0.18); w.el.style.opacity = 0.09 + 0.91 * p; w.el.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none'; });
+  vis($('#chipAI'), t, at('sr2', 0) - 0.3, a1end, { y: 12, blur: 8 });
+  const s2 = vis($('#sr2wrap'), t, at('sr2', 0) - 0.05, a1end, { y: 0, blur: 0, sp: SPF });
+  if (s2) { const dimP = EO(clamp((t - at('n3', 0.82)) / 0.8));
+    SR2.forEach(w => { const ts = srTimeFor(C.sr2, w.cp); const p = clamp((t - ts) / 0.18); w.el.style.opacity = (0.09 + 0.91 * p) * (1 - 0.7 * dimP);
+      w.el.style.borderBottomColor = `rgba(154,163,178,${0.7 * EO(clamp((t - end('sr2')) / 0.6))})`; }); }
+  vis($('#q1'), t, at('n3', 0.28), a1end, { y: 30, blur: 16, sp: SPB });
+  vis($('#q2'), t, at('n3', 0.40), a1end, { y: 30, blur: 16, sp: SPB });
+  vis($('#q3'), t, at('n3', 0.55), a1end, { y: 30, blur: 16, sp: SPB });
+
+  // ===== act 2: the letter (ghost while n4 speaks, then read aloud)
+  const lIn = at('n4', 0.35), lOut = at('n7', 0) - 0.4;
+  const lv = vis($('#letter'), t, lIn, lOut, { y: 30, blur: 18, out: 0.7 });
+  if (lv) {
+    // after sr3, the letter gives way to the title, then returns for n6
+    const tIn = end('sr3') + 0.6, back = at('n6', 0) - 0.2;
+    const away = EIO(clamp((t - tIn) / 0.9)) * (1 - EIO(clamp((t - back) / 0.9)));
+    $('#letter').style.transform += ` translateX(${away * 300}px) scale(${1 - away * 0.25})`;
+    $('#letter').style.opacity = lv * (1 - away);
+    const reading = t >= C.sr3.t0 - 0.1 && t <= end('sr3') + 0.4;
+    LINES.forEach((L, i) => {
+      const lineIn = clamp(SP(t - (lIn + i * 0.12)));
+      L.g.style.opacity = 0.35 + 0.65 * clamp((t - L.start + 0.1) / 0.4);
+      L.ln.style.transform = `translateY(${(1 - lineIn) * 22}px)`;
+      L.ws.forEach(w => { const ts = srTimeFor(C.sr3, w.cp); const spoken = t >= ts;
+        let o = t < C.sr3.t0 - 0.2 ? 0.16 : spoken ? 0.95 : 0.16;
+        if (t > end('sr3') + 0.4) o = 0.9;
+        w.el.style.opacity = o * (0.4 + 0.6 * lineIn); });
+      // n6 emphasis: family first, machine last
+      if (t > at('n6', 0)) { const fam = clamp((t - at('n6', 0.38)) / 0.6), mac = clamp((t - at('n6', 0.62)) / 0.6);
+        const chipPulse = clamp((t - at('n6', 0.04 + i * 0.045)) / 0.35);
+        L.g.style.transform = `scale(${1 + 0.06 * Math.sin(Math.PI * chipPulse)})`; L.g.style.opacity = 1;
+        L.ln.style.opacity = L.kind === 'fam' ? 1 : (L.kind === 'ai' ? 1 - 0.25 * mac : 1 - 0.5 * fam);
+      } else { L.g.style.transform = 'none'; L.ln.style.opacity = 1; }
+    });
+    // the screen-reader focus ring follows the line being read
+    const ring = $('#ring');
+    if (reading) {
+      let cur = 0; LINES.forEach((L, i) => { if (t >= L.start - 0.05) cur = i; });
+      const L = LINES[cur], prev = LINES[Math.max(0, cur - 1)];
+      const r1 = L.ln.getBoundingClientRect ? { top: L.ln.offsetTop, h: L.ln.offsetHeight } : null;
+      const r0 = { top: prev.ln.offsetTop, h: prev.ln.offsetHeight };
+      const p = cur === 0 ? 1 : clamp(SPF(t - L.start + 0.05));
+      const top = lerp(r0.top, r1.top, p), h = lerp(r0.h, r1.h, p);
+      ring.style.left = '612px'; ring.style.width = '1180px'; ring.style.top = (top - 16) + 'px'; ring.style.height = (h + 32) + 'px';
+      ring.style.opacity = clamp((t - C.sr3.t0 + 0.1) / 0.3) * (1 - clamp((t - end('sr3')) / 0.4));
+    } else ring.style.opacity = 0;
+  }
+
+  // ===== title
+  const tiA = end('sr3') + 0.9, tiB = at('n6', 0) - 0.4;
+  if (t > tiA - 0.5 && t < tiB + 1) { $('#title').style.display = 'block';
+    TITLE.forEach((s, i) => vis(s, t, tiA + i * 0.035, tiB, { y: 50, blur: 20, s: 0.94, sp: SPB, oy: -30 })); }
+  else $('#title').style.display = 'none';
+  vis($('#titleSub'), t, tiA + 0.8, tiB, { y: 14, blur: 8 });
+
+  // ===== act 3: how one letter is made
+  const hA = at('n7', 0) - 0.2, hB = at('n9', 0) - 0.5;
+  vis($('#ask'), t, hA, hB, { x: -40, y: 0, blur: 16 });
+  const nv = vis($('#nas'), t, at('n7', 0.12), hB, { y: 30, blur: 10 });
+  document.querySelectorAll('#nas .draw').forEach((p, i) => draw(p, EO(clamp((t - at('n7', 0.12) - i * 0.15) / 1.2))));
+  if (nv) $('#led').style.opacity = 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(t * 3.2));
+  vis($('#nasLbl'), t, at('n7', 0.2), hB, { y: 10, blur: 6 });
+  vis($('#ex1'), t, at('n7', 0.32), hB, { x: -16, y: 0, blur: 8 });
+  vis($('#ex2'), t, at('n7', 0.60), hB, { x: -16, y: 0, blur: 8 });
+  // experts sit at x 1150 until thumbs arrive, then hide (the thumbs take their place)
+  const thumbsIn = at('n7', 0.45);
+  THUMBS.forEach((th, i) => vis(th, t, thumbsIn + i * 0.11, hB, { y: 40, x: -120, blur: 18, s: 0.9, sp: SPB }));
+  TAGS.forEach((tg, i) => vis(tg, t, at('n7', 0.72) + i * 0.12, hB, { y: 10, blur: 6 }));
+  // path from the ask to the NAS, and dots travelling
+  const svg = $('#path'); if (!svg.dataset.ok) { svg.innerHTML = '<path id="p1" d="M590 400 C 660 400, 700 460, 770 460" stroke="rgba(241,194,125,.55)" stroke-width="2.5" fill="none"/><circle id="d1" r="7" fill="#F1C27D"/>'; svg.dataset.ok = 1; const p = $('#p1'); p.dataset.len = p.getTotalLength(); p.style.strokeDasharray = p.dataset.len; }
+  const pv = vis(svg, t, at('n7', 0.05), hB, { y: 0, blur: 0 });
+  if (pv) { draw($('#p1'), EO(clamp((t - at('n7', 0.05)) / 0.9))); along($('#p1'), $('#d1'), ((t - at('n7', 0.1)) / 1.4) % 1); }
+  vis($('#ex3'), t, at('n8', 0.62), hB, { x: -16, y: 0, blur: 8 });
+  NOTES.forEach((n, i) => vis(n, t, at('n8', 0.06 + i * 0.16), hB, { y: 26, blur: 12, sp: SPB }));
+  // the family notes pull two photos forward (photo 2 and 1)
+  [1, 0].forEach((k, i) => { const p = clamp(SP(t - at('n8', 0.1 + i * 0.16))); if (t < hB) THUMBS[k].style.boxShadow = `0 24px 60px rgba(0,0,0,.6), 0 0 0 ${3 * p}px rgba(241,194,125,${0.9 * p})`; });
+  const sv = vis($('#save'), t, at('n8', 0.55), hB, { y: 24, blur: 10, sp: SPB });
+  if (sv) { const press = at('n8', 0.92); const pr = t > press ? Math.sin(Math.PI * clamp((t - press) / 0.22)) : 0;
+    $('#save').style.transform += ` scale(${1 - 0.04 * pr})`;
+    const done = clamp((t - press - 0.15) / 0.5); draw($('#sc'), 1); $('#sk').style.strokeDasharray = 30; $('#sk').style.strokeDashoffset = 30 * (1 - EO(done));
+    $('#saveT').textContent = t > press + 0.15 ? 'Saved, once' : 'Save'; }
+
+  // ===== act 4: trust
+  const iA = at('n9', 0) - 0.3, iB = at('n10', 0) - 0.2;
+  vis($('#idwrap'), t, iA, iB, { y: 30, blur: 16, s: 0.96 });
+  const hide = EO(clamp((t - at('n9', 0.35)) / 0.9));
+  $('#idimg').style.filter = `blur(${hide * 34}px) saturate(${1 - hide * 0.9}) brightness(${1 - hide * 0.45})`;
+  vis($('#stamp'), t, at('n9', 0.55), iB, { y: 0, s: 1.12, blur: 8, sp: SPB });
+  vis($('#idlist'), t, at('n9', 0.2), iB, { y: 12, blur: 6 });
+  const fA = at('n10', 0) - 0.1, fB = at('n11', 0) - 0.2;
+  const fv = vis($('#face'), t, fA, fB, { y: 20, blur: 12 });
+  document.querySelectorAll('#face .draw').forEach((p, i) => { if (p.id !== 'fx') draw(p, EO(clamp((t - fA - i * 0.2) / 1.1))); });
+  $('#fbox').style.opacity = clamp((t - at('n10', 0.15)) / 0.3); draw($('#fx'), EO(clamp((t - at('n10', 0.5)) / 0.5)));
+  vis($('#nameRow'), t, at('n10', 0.45), fB, { y: 20, blur: 12, sp: SPB });
+  const lA = at('n11', 0) - 0.1, lB = at('n12', 0) - 0.4;
+  vis($('#lq'), t, lA, lB, { x: -30, y: 0, blur: 12 });
+  const lp = vis($('#loop'), t, lA + 0.3, lB, { y: 0, blur: 0 });
+  if (lp) { const a1 = $('#arc1'), a2 = $('#arc2');
+    const f1 = EIO(clamp((t - at('n11', 0.22)) / 1.6)), f2 = EIO(clamp((t - at('n11', 0.62)) / 1.4));
+    a1.style.strokeDashoffset = 0; a1.style.opacity = f1 > 0 ? 1 : 0; along(a1, $('#dot1'), f1); $('#dot1').style.opacity = f1 > 0 && f1 < 1 ? 1 : 0;
+    const L2 = a2.getTotalLength(); a2.style.strokeDasharray = L2; a2.style.strokeDashoffset = L2 * (1 - f2); along(a2, $('#dot2'), f2); $('#dot2').style.opacity = f2 > 0 && f2 < 1 ? 1 : 0;
+    a1.style.strokeDasharray = '8 10'; a1.style.clipPath = `inset(0 ${100 - f1 * 100}% 0 0)`; }
+  vis($('#lf'), t, at('n11', 0.3), lB, { y: 20, blur: 12, s: 0.9, sp: SPB });
+  vis($('#la'), t, at('n11', 0.68), lB, { y: 24, blur: 14, sp: SPB });
+
+  // ===== act 5: status
+  const sA = at('n12', 0) - 0.2, sB = at('n13', 0) - 0.6;
+  vis($('#st1'), t, sA, sB, { y: 30, blur: 14 });
+  vis($('#st2'), t, at('n12', 0.3), sB, { y: 30, blur: 14 });
+  vis($('#st3'), t, at('n12', 0.78), sB, { y: 30, blur: 14 });
+  $('#cnt').textContent = Math.round(23 * EO(clamp((t - at('n12', 0.36)) / 1.6)));
+
+  // ===== act 6: the reveal
+  const rA = at('n13', 0) - 0.4;
+  vis($('#pnum'), t, rA, at('n13', 0.5), { y: 0, blur: 6 });
+  const ph = $('#photo'); const open = EIO(clamp((t - at('n13', 0.45)) / 2.4));
+  const fadeEnd = end('n14') + 3.0;
+  if (t > at('n13', 0.4) && t < fadeEnd + 1.5) { ph.style.visibility = 'visible';
+    ph.style.clipPath = `circle(${open * 75}% at 50% 50%)`;
+    ph.style.opacity = 1 - EO(clamp((t - fadeEnd) / 1.2));
+    ph.style.transform = `scale(${1.1 - 0.1 * EO(clamp((t - at('n13', 0.45)) / 9))})`;
+    ph.style.filter = `brightness(${1 - 0.5 * EO(clamp((t - at('n14', 0)) / 1.2))})`;
+  } else ph.style.visibility = 'hidden';
+  vis($('#photoShade'), t, at('n14', 0), fadeEnd, { y: 0, blur: 0, out: 1.2 });
+  vis($('#famq'), t, at('n14', 0) - 0.2, fadeEnd, { y: 30, blur: 16, sp: SPB, out: 1.0 });
+  const eA = fadeEnd + 0.6;
+  if (t > eA - 0.5) { $('#endT').style.display = 'block'; ENDT.forEach((s, i) => vis(s, t, eA + i * 0.04, null, { y: 50, blur: 20, s: 0.94, sp: SPB })); }
+  else $('#endT').style.display = 'none';
+  vis($('#endS'), t, eA + 1.0, null, { y: 16, blur: 10 });
+  vis($('#endM'), t, eA + 1.8, null, { y: 10, blur: 6 });
+
+  // ===== narration captions (subs=1): words fade in as they are said
+  const cap = $('#cap');
+  let on = null; for (const n of NARS) if (t >= n.c.t0 - 0.1 && t <= n.c.t1 + 0.5) on = n;
+  if (!SUBS_ON || !on) { cap.style.opacity = 0; $('#capbar').style.opacity = 0; }
+  else {
+    if (capKey !== on.c.id) { cap.innerHTML = ''; on.spans = on.w.map(([s, p]) => [s, el('span', '', p, cap)]); capKey = on.c.id; }
+    on.spans.forEach(([s, sp]) => { const p = clamp((t - s + 0.05) / 0.22); sp.style.opacity = 0.18 + 0.82 * p; });
+    const o = clamp((t - on.c.t0 + 0.1) / 0.25) * (1 - clamp((t - on.c.t1 - 0.2) / 0.3));
+    cap.style.opacity = o; $('#capbar').style.opacity = o;
+  }
+}
+window.seek = t => tick(t);
+document.fonts.ready.then(() => Promise.all([...document.images].map(i => i.complete ? 1 : new Promise(r => { i.onload = i.onerror = r; }))))
+  .then(() => { build(); tick(0); window.READY = true; window.TOTAL = TOTAL; window.SUBTITLES = window.CUES.filter(c => c.kind !== 'gap').map(c => [c.t0, c.t1, (c.kind === 'sr' ? '[Screen reader] ' : '') + c.text]); });
+</script>
+</body>
+</html>

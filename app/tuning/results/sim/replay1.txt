@@ -1,0 +1,1 @@
+S1 1 FAIL calls 6 ['1', '3', '4', '4', '6', '7', '8'] ['every delegate valid (target, quoting, hygiene, slots, traced values)', 'first preview: Photo 6: real path line', 'full letter shown again after the notes', 'step 7 file name takes the first free number 2', 'saved letter: Photo 6: real path line']

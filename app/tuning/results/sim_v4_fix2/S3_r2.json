@@ -1,0 +1,186 @@
+{
+ "scenario": "S3",
+ "run": 2,
+ "title": "Several albums match",
+ "turns": [
+  {
+   "role": "user",
+   "content": "Album Out Loud for my uncle, he has low vision. Album Christmas."
+  },
+  {
+   "role": "assistant",
+   "content": "Album Out Loud setup. Reply go, or change any line.\n1. Album or photo folder: Christmas\n2. For: your uncle, in English\n3. Detail: brief, one AI sentence per photo. Say rich for up to three sentences per photo.\n4. Photos: 6, at most 10\n5. Family notes signed by: the family\n6. Letter: new",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "go"
+  },
+  {
+   "role": "assistant",
+   "content": "delegate --target photo-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. If the photo service is unhealthy, return failed and why. Use the photo folder if it is not none, otherwise the album whose name matches exactly. Use only a regular, folder, condition or custom album, never a face, baby, pet, object, location or city album; if only such an album matches, return no results. If several match, return at most 5 with their real UUID and photo count, and stop. Return the real name, album UUID or folder path, and photo count. If nothing matches, return no results with the closest search suggestions. Change nothing. Values: album = Christmas; photo folder = none.'",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "EXPERT RESULT from photo-agent:\n{\n \"status\": \"completed\",\n \"actionsRun\": [\n  \"health\",\n  \"albums\"\n ],\n \"data\": {\n  \"severalMatch\": true,\n  \"albums\": [\n   {\n    \"name\": \"Christmas 2023\",\n    \"albumUuid\": \"1f7a3b9e-4c2d-4e8f-b6a1-7d9c0e2f4a35\",\n    \"photoCount\": 31\n   },\n   {\n    \"name\": \"Christmas 2024\",\n    \"albumUuid\": \"8e4d1c7b-3a9f-4b2e-9c6d-2f1a0b8e7d53\",\n    \"photoCount\": 22\n   },\n   {\n    \"name\": \"Christmas at the farm\",\n    \"albumUuid\": \"3c9b7e2a-1d4f-4a6c-8e3b-5a7d9f1c2e64\",\n    \"photoCount\": 9\n   }\n  ]\n },\n \"note\": \"No album is named exactly Christmas. Stopped as asked.\"\n}"
+  },
+  {
+   "role": "assistant",
+   "content": "Several albums match Christmas. Please pick one:\n\n1. Christmas 2023 — 31 photos\n2. Christmas 2024 — 22 photos\n3. Christmas at the farm — 9 photos\n\nSay the number or the exact name, and I will continue.",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "Christmas 2024, please."
+  },
+  {
+   "role": "assistant",
+   "content": "delegate --target photo-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. If the photo service is unhealthy, return failed and why. Use the photo folder if it is not none, otherwise the album whose name matches exactly. Use only a regular, folder, condition or custom album, never a face, baby, pet, object, location or city album; if only such an album matches, return no results. If several match, return at most 5 with their real UUID and photo count, and stop. Return the real name, album UUID or folder path, and photo count. If nothing matches, return no results with the closest search suggestions. Change nothing. Values: album = Christmas 2024; photo folder = none.'",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "EXPERT RESULT from photo-agent:\n{\n \"status\": \"completed\",\n \"actionsRun\": [\n  \"health\",\n  \"albums\"\n ],\n \"data\": {\n  \"name\": \"Christmas 2024\",\n  \"albumUuid\": \"8e4d1c7b-3a9f-4b2e-9c6d-2f1a0b8e7d53\",\n  \"photoCount\": 22\n }\n}"
+  },
+  {
+   "role": "assistant",
+   "content": "delegate --target photo-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. List still photos only, without videos and the screenshot category, paging through as many items as the photo count, sorted by capture time, oldest first. If the start time is not none, keep only photos taken after it, and leave out the already listed paths. If more remain than the limit, apply selection rule 1: keep the oldest and the newest, spread the rest evenly by position, and if a pick shares its minute with the pick before it, take the next photo in a later minute while one remains. Read their metadata in one call. Return the number of photos that qualified before the limit, the number kept, the newest capture time kept as year-month-day hour:minute:second, and per chosen photo, oldest first, P number, capture date and time, camera or file as its time source, the city, area or venue name or none, and the real file path. No street, house number or coordinates. Without capture times, say capture order unknown and newest time unknown. If no still photo remains, say no results. Change nothing. Values: album = Christmas 2024; album UUID or photo folder = 8e4d1c7b-3a9f-4b2e-9c6d-2f1a0b8e7d53; photo count = 22; limit = 6; start time = none; already listed = none.'",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "EXPERT RESULT from photo-agent:\n{\n \"status\": \"completed\",\n \"data\": \"scenario ends here\"\n}"
+  }
+ ],
+ "delegates": [
+  {
+   "turn": 3,
+   "step": "1",
+   "target": "photo-agent",
+   "instruction": "Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. If the photo service is unhealthy, return failed and why. Use the photo folder if it is not none, otherwise the album whose name matches exactly. Use only a regular, folder, condition or custom album, never a face, baby, pet, object, location or city album; if only such an album matches, return no results. If several match, return at most 5 with their real UUID and photo count, and stop. Return the real name, album UUID or folder path, and photo count. If nothing matches, return no results with the closest search suggestions. Change nothing. Values: album = Christmas; photo folder = none.",
+   "issues": [],
+   "result": {
+    "status": "completed",
+    "actionsRun": [
+     "health",
+     "albums"
+    ],
+    "data": {
+     "severalMatch": true,
+     "albums": [
+      {
+       "name": "Christmas 2023",
+       "albumUuid": "1f7a3b9e-4c2d-4e8f-b6a1-7d9c0e2f4a35",
+       "photoCount": 31
+      },
+      {
+       "name": "Christmas 2024",
+       "albumUuid": "8e4d1c7b-3a9f-4b2e-9c6d-2f1a0b8e7d53",
+       "photoCount": 22
+      },
+      {
+       "name": "Christmas at the farm",
+       "albumUuid": "3c9b7e2a-1d4f-4a6c-8e3b-5a7d9f1c2e64",
+       "photoCount": 9
+      }
+     ]
+    },
+    "note": "No album is named exactly Christmas. Stopped as asked."
+   },
+   "chat_before": ""
+  },
+  {
+   "turn": 7,
+   "step": "1",
+   "target": "photo-agent",
+   "instruction": "Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. If the photo service is unhealthy, return failed and why. Use the photo folder if it is not none, otherwise the album whose name matches exactly. Use only a regular, folder, condition or custom album, never a face, baby, pet, object, location or city album; if only such an album matches, return no results. If several match, return at most 5 with their real UUID and photo count, and stop. Return the real name, album UUID or folder path, and photo count. If nothing matches, return no results with the closest search suggestions. Change nothing. Values: album = Christmas 2024; photo folder = none.",
+   "issues": [],
+   "result": {
+    "status": "completed",
+    "actionsRun": [
+     "health",
+     "albums"
+    ],
+    "data": {
+     "name": "Christmas 2024",
+     "albumUuid": "8e4d1c7b-3a9f-4b2e-9c6d-2f1a0b8e7d53",
+     "photoCount": 22
+    }
+   },
+   "chat_before": ""
+  },
+  {
+   "turn": 9,
+   "step": "3",
+   "target": "photo-agent",
+   "instruction": "Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. List still photos only, without videos and the screenshot category, paging through as many items as the photo count, sorted by capture time, oldest first. If the start time is not none, keep only photos taken after it, and leave out the already listed paths. If more remain than the limit, apply selection rule 1: keep the oldest and the newest, spread the rest evenly by position, and if a pick shares its minute with the pick before it, take the next photo in a later minute while one remains. Read their metadata in one call. Return the number of photos that qualified before the limit, the number kept, the newest capture time kept as year-month-day hour:minute:second, and per chosen photo, oldest first, P number, capture date and time, camera or file as its time source, the city, area or venue name or none, and the real file path. No street, house number or coordinates. Without capture times, say capture order unknown and newest time unknown. If no still photo remains, say no results. Change nothing. Values: album = Christmas 2024; album UUID or photo folder = 8e4d1c7b-3a9f-4b2e-9c6d-2f1a0b8e7d53; photo count = 22; limit = 6; start time = none; already listed = none.",
+   "issues": [],
+   "result": {
+    "status": "completed",
+    "data": "scenario ends here"
+   },
+   "chat_before": ""
+  }
+ ],
+ "protocol": [],
+ "error": null,
+ "calls": 5,
+ "replayed_turns": 0,
+ "ctx": {
+  "setup_reply": true,
+  "picked": true
+ },
+ "saved_text": null,
+ "checks": [
+  {
+   "name": "delegate sequence",
+   "ok": true,
+   "detail": "got ['1', '1', '3'], expected ['1', '3']",
+   "critical": true
+  },
+  {
+   "name": "every delegate valid (target, quoting, hygiene, slots, traced values)",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "one command per message",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "never writes an expert result itself",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "setup message first, no delegate before the reply",
+   "ok": true,
+   "detail": "Album Out Loud setup. Reply go, or change any line.\n1. Album or photo folder: Christmas\n2. For: your uncle, in English\n3. Detail: brief, one AI sentence per pho",
+   "critical": true
+  },
+  {
+   "name": "asks the user to pick before going on",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "step 3 uses the picked album UUID and count",
+   "ok": true,
+   "detail": "album = Christmas 2024; album UUID or photo folder = 8e4d1c7b-3a9f-4b2e-9c6d-2f1a0b8e7d53; photo count = 22; limit = 6; start time = none; already listed = none.",
+   "critical": true
+  },
+  {
+   "name": "step 3 only after the pick",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  }
+ ],
+ "pass": true
+}

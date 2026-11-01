@@ -1,0 +1,12 @@
+# Official kit (no licence file; add it locally to run the checker)
+refs/
+# Secrets and local files
+*.key
+.env
+secrets/
+# Python
+__pycache__/
+*.pyc
+# Film renders and voice takes
+submission/tools/film/audio/
+*.mp4

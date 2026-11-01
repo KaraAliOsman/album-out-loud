@@ -1,0 +1,33 @@
+system prompt: 52435 chars, linked files: references/filled-instructions.md, references/capability-map.md, references/vision-prompts.md, references/letter-format.md, references/quick-test.md, references/disclosure.md
+Traceback (most recent call last):
+  File "<repo>\app\tuning\simulate.py", line 929, in <module>
+    main()
+    ~~~~^^
+  File "<repo>\app\tuning\simulate.py", line 914, in main
+    logs = list(ex.map(lambda j: run_scenario(j[0], j[1], system_prompt), jobs))
+  File "<python>\Lib\concurrent\futures\_base.py", line 639, in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "<python>\Lib\concurrent\futures\_base.py", line 311, in _result_or_cancel
+    return fut.result(timeout)
+           ~~~~~~~~~~^^^^^^^^^
+  File "<python>\Lib\concurrent\futures\_base.py", line 443, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "<python>\Lib\concurrent\futures\_base.py", line 395, in __get_result
+    raise self._exception
+  File "<python>\Lib\concurrent\futures\thread.py", line 86, in run
+    result = ctx.run(self.task)
+  File "<python>\Lib\concurrent\futures\thread.py", line 73, in run
+    return fn(*args, **kwargs)
+  File "<repo>\app\tuning\simulate.py", line 914, in <lambda>
+    logs = list(ex.map(lambda j: run_scenario(j[0], j[1], system_prompt), jobs))
+                                 ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>\app\tuning\simulate.py", line 564, in run_scenario
+    result = mock(sid, ctx, step, d["target"], d["instruction"] or "")
+  File "<repo>\app\tuning\simulate.py", line 381, in mock
+    words = re.search(r"Words:\s*(.*)", ans)
+  File "<python>\Lib\re\__init__.py", line 177, in search
+    return _compile(pattern, flags).search(string)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+TypeError: expected string or bytes-like object, got 'NoneType'

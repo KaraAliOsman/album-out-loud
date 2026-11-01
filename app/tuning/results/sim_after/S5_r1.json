@@ -1,0 +1,179 @@
+{
+ "scenario": "S5",
+ "run": 1,
+ "title": "Relayed visible question about photo 4",
+ "turns": [
+  {
+   "role": "user",
+   "content": "Album Out Loud: Grandpa is listening to the letter of Grandpa's 80th birthday and asks, in photo 4, what is Grandpa wearing?"
+  },
+  {
+   "role": "assistant",
+   "content": "delegate --target file-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. Use the path value if not none. Otherwise, in the personal folder of the user and its subfolders, find files whose name starts with Listening letter and a dash and whose album part, the text before the last dash, contains the album value, ignoring case and spacing; if several albums match, return at most 3 names and stop. Take the one dated as the letter date, else the latest, then the highest end number. Return its real path, folder and file name, its first line, the line that starts with the word for photo and the number N, such as Photo N of or Foto N de, the lines after it up to the next empty line, and under For the helper: photo files the Language line and the Photo N: line, or no results if missing. Also return the latest letter name of this album and the files in that folder named Listener questions, a dash and that name without its ending, or none. If none matches, say no results. Change nothing. Values: album = Grandpa’s 80th birthday; photo number = 4; letter date = none; path = none.'",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "EXPERT RESULT from file-agent:\n{\n \"status\": \"completed\",\n \"actionsRun\": [\n  \"get-user-dir\",\n  \"find\",\n  \"cat\"\n ],\n \"data\": {\n  \"path\": \"/volume1/homes/ana/Listening letter - Grandpa’s 80th birthday - 2026-09-12 18-40.txt\",\n  \"folder\": \"/volume1/homes/ana\",\n  \"fileName\": \"Listening letter - Grandpa’s 80th birthday - 2026-09-12 18-40.txt\",\n  \"firstLine\": \"Grandpa, here are 8 photos from Grandpa’s 80th birthday, chosen by Ana.\",\n  \"entryLines\": [\n   \"Photo 4 of 8.\",\n   \"When: 12 September 2026, 16:24.\",\n   \"Where: Reñaca.\",\n   \"Family says: Grandpa’s dog Toby, with Grandpa on the left and Aunt Rosa on the right.\",\n   \"AI guess: Two adults and a dog sit on a bench facing the sea.\"\n  ],\n  \"languageLine\": \"Language: English\",\n  \"photoLine\": \"Photo 4: /volume1/Photos/2026/Grandpa’s 80th birthday/IMG_4113.jpg\",\n  \"latestLetter\": \"Listening letter - Grandpa’s 80th birthday - 2026-09-12 18-40.txt\",\n  \"listenerQuestionFiles\": \"none\"\n }\n}"
+  },
+  {
+   "role": "assistant",
+   "content": "In the Grandpa’s 80th birthday letter of 12 September 2026, photo 4.\n\nFrom the family notes: Grandpa’s dog Toby, with Grandpa on the left and Aunt Rosa on the right.\n\nThe question asks what Grandpa is wearing, and the Family says line gives Grandpa on the left, so the rewritten question is: what is the person on the left wearing.\n\ndelegate --target photo-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. Use the vision-vlm action of the NAS without setting another model value, and send the photo to no other service; if vision-vlm is not available, return failed. Run it once with temperature 0.2, max tokens 80 and this prompt, copied exactly. Prompt begins: A listener who is blind asks a question about one family photo. The question is: what is the person on the left wearing. Step 1, privacy: if the photo shows an ID card, a bank card, a medical paper, a medical scene, an injury, a bare body, a baby or child who is not fully dressed, such as in a bath, or a phone or computer screen with messages or personal data, answer only the English word UNCLEAR, whatever the question. Step 2, what a photo cannot show: answer only the English word UNCLEAR if the question, in any language, asks who a person is, which person has a role or whether a person has a role, such as groom, bride, husband, wife, father, mother, grandmother, son or daughter, even when one person looks likely, or asks how people are related, a name, a gender, a feeling, an age in years, a date, a place name that is not written, who made something, or what happened before or after. Answer only UNCLEAR too if the photo is too dark or blurred to tell. Step 3, if the thing asked about is not in the photo, say in English that you do not see it, and stop. Step 4, otherwise answer only the question, in English, in at most 2 short sentences: the direct answer first, then one detail you can see that supports it. Point to people only by position and clothing, with left and right as seen by someone looking at the photo, and never use man, woman, boy, girl, he, she or any word about gender, ethnicity, skin, body or looks. Give exact counts up to 5, otherwise say a group. Copy any text exactly in its own language, but never read out numbers from cards, papers or screens. Never start with the image shows or the photo shows, and do not repeat the question. Use no quotation marks, no apostrophes and, in English, no contractions. Prompt ends. Return the answer word for word, with every straight apostrophe written as ’. Values: path = /volume1/Photos/2026/Grandpa’s 80th birthday/IMG_4113.jpg.'",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "EXPERT RESULT from photo-agent:\n{\n \"status\": \"completed\",\n \"actionsRun\": [\n  \"vision-vlm\"\n ],\n \"data\": {\n  \"answer\": \"The person on the left is wearing a white hoodie and a straw hat. The hoodie has a bird logo and text on the back.\"\n }\n}"
+  },
+  {
+   "role": "assistant",
+   "content": "In the Grandpa’s 80th birthday letter of 12 September 2026, photo 4.\n\nAI guess, may be wrong: The person on the left is wearing a white hoodie and a straw hat. The hoodie has a bird logo and text on the back.",
+   "finish": "stop"
+  }
+ ],
+ "delegates": [
+  {
+   "turn": 1,
+   "step": "Q1",
+   "target": "file-agent",
+   "instruction": "Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. Use the path value if not none. Otherwise, in the personal folder of the user and its subfolders, find files whose name starts with Listening letter and a dash and whose album part, the text before the last dash, contains the album value, ignoring case and spacing; if several albums match, return at most 3 names and stop. Take the one dated as the letter date, else the latest, then the highest end number. Return its real path, folder and file name, its first line, the line that starts with the word for photo and the number N, such as Photo N of or Foto N de, the lines after it up to the next empty line, and under For the helper: photo files the Language line and the Photo N: line, or no results if missing. Also return the latest letter name of this album and the files in that folder named Listener questions, a dash and that name without its ending, or none. If none matches, say no results. Change nothing. Values: album = Grandpa’s 80th birthday; photo number = 4; letter date = none; path = none.",
+   "issues": [],
+   "result": {
+    "status": "completed",
+    "actionsRun": [
+     "get-user-dir",
+     "find",
+     "cat"
+    ],
+    "data": {
+     "path": "/volume1/homes/ana/Listening letter - Grandpa’s 80th birthday - 2026-09-12 18-40.txt",
+     "folder": "/volume1/homes/ana",
+     "fileName": "Listening letter - Grandpa’s 80th birthday - 2026-09-12 18-40.txt",
+     "firstLine": "Grandpa, here are 8 photos from Grandpa’s 80th birthday, chosen by Ana.",
+     "entryLines": [
+      "Photo 4 of 8.",
+      "When: 12 September 2026, 16:24.",
+      "Where: Reñaca.",
+      "Family says: Grandpa’s dog Toby, with Grandpa on the left and Aunt Rosa on the right.",
+      "AI guess: Two adults and a dog sit on a bench facing the sea."
+     ],
+     "languageLine": "Language: English",
+     "photoLine": "Photo 4: /volume1/Photos/2026/Grandpa’s 80th birthday/IMG_4113.jpg",
+     "latestLetter": "Listening letter - Grandpa’s 80th birthday - 2026-09-12 18-40.txt",
+     "listenerQuestionFiles": "none"
+    }
+   },
+   "chat_before": ""
+  },
+  {
+   "turn": 3,
+   "step": "Q2",
+   "target": "photo-agent",
+   "instruction": "Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. Use the vision-vlm action of the NAS without setting another model value, and send the photo to no other service; if vision-vlm is not available, return failed. Run it once with temperature 0.2, max tokens 80 and this prompt, copied exactly. Prompt begins: A listener who is blind asks a question about one family photo. The question is: what is the person on the left wearing. Step 1, privacy: if the photo shows an ID card, a bank card, a medical paper, a medical scene, an injury, a bare body, a baby or child who is not fully dressed, such as in a bath, or a phone or computer screen with messages or personal data, answer only the English word UNCLEAR, whatever the question. Step 2, what a photo cannot show: answer only the English word UNCLEAR if the question, in any language, asks who a person is, which person has a role or whether a person has a role, such as groom, bride, husband, wife, father, mother, grandmother, son or daughter, even when one person looks likely, or asks how people are related, a name, a gender, a feeling, an age in years, a date, a place name that is not written, who made something, or what happened before or after. Answer only UNCLEAR too if the photo is too dark or blurred to tell. Step 3, if the thing asked about is not in the photo, say in English that you do not see it, and stop. Step 4, otherwise answer only the question, in English, in at most 2 short sentences: the direct answer first, then one detail you can see that supports it. Point to people only by position and clothing, with left and right as seen by someone looking at the photo, and never use man, woman, boy, girl, he, she or any word about gender, ethnicity, skin, body or looks. Give exact counts up to 5, otherwise say a group. Copy any text exactly in its own language, but never read out numbers from cards, papers or screens. Never start with the image shows or the photo shows, and do not repeat the question. Use no quotation marks, no apostrophes and, in English, no contractions. Prompt ends. Return the answer word for word, with every straight apostrophe written as ’. Values: path = /volume1/Photos/2026/Grandpa’s 80th birthday/IMG_4113.jpg.",
+   "issues": [],
+   "result": {
+    "status": "completed",
+    "actionsRun": [
+     "vision-vlm"
+    ],
+    "data": {
+     "answer": "The person on the left is wearing a white hoodie and a straw hat. The hoodie has a bird logo and text on the back."
+    }
+   },
+   "chat_before": "In the Grandpa’s 80th birthday letter of 12 September 2026, photo 4.\n\nFrom the family notes: Grandpa’s dog Toby, with Grandpa on the left and Aunt Rosa on the right.\n\nThe question asks what Grandpa is wearing, and the Family says line gives Grandpa on the left, so the rewritten question is: what is the person on the left wearing."
+  }
+ ],
+ "protocol": [],
+ "error": null,
+ "calls": 3,
+ "replayed_turns": 0,
+ "ctx": {},
+ "saved_text": null,
+ "checks": [
+  {
+   "name": "delegate sequence",
+   "ok": true,
+   "detail": "got ['Q1', 'Q2'], expected ['Q1', 'Q2']",
+   "critical": true
+  },
+  {
+   "name": "every delegate valid (target, quoting, hygiene, slots, traced values)",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "one command per message",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "never writes an expert result itself",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "question mode: no setup message",
+   "ok": true,
+   "detail": "delegate --target file-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight ",
+   "critical": true
+  },
+  {
+   "name": "Q1 values album and photo number",
+   "ok": true,
+   "detail": "album = Grandpa’s 80th birthday; photo number = 4; letter date = none; path = none.",
+   "critical": true
+  },
+  {
+   "name": "reply starts with the spoken letter form, photo N",
+   "ok": true,
+   "detail": "In the Grandpa’s 80th birthday letter of 12 September 2026, photo 4.\n\nAI guess, may be wrong: The person on the left is ",
+   "critical": true
+  },
+  {
+   "name": "Q2 question holds no name or family word",
+   "ok": true,
+   "detail": "what is the person on the left wearing",
+   "critical": true
+  },
+  {
+   "name": "Q2 question names a position",
+   "ok": true,
+   "detail": "what is the person on the left wearing",
+   "critical": true
+  },
+  {
+   "name": "Q2 max tokens 80",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "Q2 path is the photo 4 path from Q1",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "question prompt copied exactly (call 1)",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "question max tokens 80 (call 1)",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "reply line AI guess, may be wrong",
+   "ok": true,
+   "detail": "In the Grandpa’s 80th birthday letter of 12 September 2026, photo 4.\n\nAI guess, may be wrong: The person on the left is wearing a white hoodie and a straw hat. The hoodie has a bird logo and text on t",
+   "critical": true
+  }
+ ],
+ "pass": true
+}

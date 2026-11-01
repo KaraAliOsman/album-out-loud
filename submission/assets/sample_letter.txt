@@ -1,0 +1,73 @@
+Dad, here are 8 new photos from Sample family album, chosen by Ana.
+About this letter: Taken between 3 May 2026 and 12 September 2026.
+How to listen: Each photo starts with its number, such as Photo 1 of 8. Lines that start with Family says are from Ana, and names come only from them. Lines that start with AI guess were written by a computer and may be wrong.
+
+Photo 1 of 8.
+When: copied or scanned on 3 May 2026; the photo itself may be older.
+Family says: Grandma Rosa holding you, the winter you were born.
+AI guess: In black and white, an adult holds a baby.
+
+Photo 2 of 8.
+When: 14 June 2026, 7:52 in the evening.
+Where: Valparaíso.
+Family says: your birthday cake from the corner bakery, chocolate as always.
+AI guess: A slice of chocolate cake sits on a white plate with a yellow rim.
+Words in the photo, AI reading: Happy Birthday.
+
+Photo 3 of 8.
+When: 14 June 2026, 8:15 in the evening.
+Where: Valparaíso.
+Family says: Leo in his favourite shirt, the one he wears to every family lunch.
+AI guess: An adult wears a white t-shirt with a printed message and graphic.
+Words in the photo, AI reading: Patente de software Não.
+
+Photo 4 of 8.
+When: 2 August 2026, 6:40 in the evening.
+Where: Algarrobo.
+Family says: Marta and Leo with Luna, after the long walk on the beach.
+AI guess: Two adults and a dog sit on a bench facing the sea.
+
+Photo 5 of 8.
+When: 22 August 2026, 1:05 in the afternoon.
+Where: Santiago.
+Family says: the guests outside after Pablo’s wedding. You are second from the left.
+AI guess: A group of adults stands together in front of a building.
+
+Photo 6 of 8.
+When: 22 August 2026, 11:48 in the evening.
+Where: Santiago.
+Family says: the last dance of the night. The photo came out dark, but everyone was on the floor.
+AI guess: The photo is too dark or too blurred to see.
+
+Photo 7 of 8.
+When: 23 August 2026, from the file date, may be wrong.
+This photo was not described. Reason: ID card with personal data.
+
+Photo 8 of 8.
+When: 12 September 2026, 6:05 in the evening.
+Where: Vitoria-Gasteiz.
+Family says: the street where Marta lived that year, near the old market.
+AI guess: A blue street sign hangs from a metal pole on a cloudy day.
+Words in the photo, AI reading: CALLE ESCORIAZA.
+
+Answers from the family:
+From an earlier letter, photo 2: you asked whose garden the party was in. Ana says: Aunt Clara’s, in Quilpué.
+
+What this letter cannot tell you: Photo 7 was not described. Your question about photo 5 of the earlier letter, who took the picture at the lake, is still with the family.
+
+From Ana. The rest of this letter is a file list for the helper; you can stop listening here.
+
+For the helper: photo files
+Keep this part for the next letter. It holds folder names, so remove it from any copy shared outside the family.
+Language: English
+Selection rule: 1
+Newest photo checked: 2026-09-12 18:05:33
+Open question: Photo 5, Listening letter - Sample family album - 2026-04-30 18-20, who took the picture at the lake, asked by Dad.
+Photo 1: Photos/Sample family album/11_bw_adult_baby.jpg
+Photo 2: Photos/Sample family album/12_cake_happy_birthday.jpg
+Photo 3: Photos/Sample family album/16_tshirt_portuguese.jpg
+Photo 4: Photos/Sample family album/08_beach_dog.jpg
+Photo 5: Photos/Sample family album/05_wedding_group.jpg
+Photo 6: Photos/Sample family album/25_dark_blurry_group.jpg
+Photo 7: Photos/Sample family album/22_synthetic_id_card.jpg
+Photo 8: Photos/Sample family album/14_spanish_street_sign.jpg

@@ -1,0 +1,43 @@
+system prompt: 64194 chars, linked files: references/filled-instructions.md, references/capability-map.md, references/vision-prompts.md, references/letter-format.md, references/quick-test.md, references/disclosure.md
+S1 r1: FAIL calls=11 steps=['1', '3', '4', '4', '6', '7', '8']
+   - ! every delegate valid (target, quoting, hygiene, slots, traced values): step 7: 1 straight apostrophe(s) inside the instruction; step 8: 1 straight apostrophe(s) inside the instruction
+   - ! brief prompt copied exactly (call 2): similarity 1.000; delete: sent [s] expected []
+   - ! preview shown with counts: Preview: 8 of 8 photos chosen, 1 not described (P5). Nothing is saved yet.
+
+Grandpa, here are 8 photos from Grandpa’s 80
+   - ~ saved letter: photo 6 OCR words not marked AI reading: a del Mar. AI guess: A welcome sign for the city of Haskell stands in a grassy field with bushes. Words in the photo, AI reading: Welcome to the CITY OF HASKELL
+S2 r1: PASS calls=3 steps=['1']
+S3 r1: PASS calls=5 steps=['1', '1', '3']
+S4 r1: FAIL calls=11 steps=['1', '2', '3', '4', '6', '7', '8']
+   - ! saved letter: Answers from the family line: 
+S5 r1: FAIL calls=3 steps=['Q1', 'Q2']
+   - ! reply starts with the spoken letter form, photo N: AI guess, may be wrong: The person on the left is wearing a white hoodie and a straw hat. The hoodie has a bird logo and
+S6 r1: PASS calls=5 steps=['Q1', 'Q3']
+S7 r1: FAIL calls=9 steps=['1', '3', '4', '6', '7']
+   - ! rich prompt copied exactly (call 1): similarity 0.928; delete: sent [Mention only what you can see clearly; leave out a detail yo] expected [] / insert: sent [] expected [photo is black and white or an old print, begin Line 1 with ]
+   - ! denied: shows the letter in chat: 
+S8 r1: PASS calls=5 steps=['1', '3', '4']
+   - ~ Spanish preview: photo 3 OCR words not marked AI reading:  de la tarde. Where: Valparaíso. AI guess: Una señal azul indica la Calle Escoriaza junto a un poste y un árbol. Words in the photo, AI reading: CALLE ESCORIAZA
+S1 r2: FAIL calls=10 steps=['1', '3', '4', '4', '6', '7', '8']
+   - ! every delegate valid (target, quoting, hygiene, slots, traced values): step 7: 1 straight apostrophe(s) inside the instruction; step 8: 1 straight apostrophe(s) inside the instruction
+   - ! setup message first, no delegate before the reply: delegate --target photo-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and
+   - ! preview shown with counts: Preview: 8 of 8 photos chosen, 1 not described (P5). Nothing is saved yet.
+
+Here, here are 8 photos from Grandpa’s 80th 
+   - ~ saved letter: For Grandpa / prepared by Ana: Here, here are 8 photos from Grandpa’s 80th birthday, chosen by the family.
+About this letter: Taken on 12 September 2026, from 3:02 in the afternoon to 6:40 in the evening.
+How to listen: Each photo 
+S2 r2: PASS calls=3 steps=['1']
+S3 r2: FAIL calls=5 steps=['1', '1']
+   - ! delegate sequence: got ['1', '1'], expected ['1', '3']
+   - ! reaches step 3 after the pick: 
+S4 r2: FAIL calls=11 steps=['1', '2', '3', '4', '6', '7', '8']
+   - ! saved letter: Answers from the family line: 
+S5 r2: PASS calls=3 steps=['Q1', 'Q2']
+S6 r2: PASS calls=5 steps=['Q1', 'Q3']
+S7 r2: FAIL calls=9 steps=['1', '3', '4', '6', '7']
+   - ! rich prompt copied exactly (call 1): similarity 0.928; delete: sent [Mention only what you can see clearly; leave out a detail yo] expected [] / insert: sent [] expected [photo is black and white or an old print, begin Line 1 with ]
+S8 r2: PASS calls=5 steps=['1', '3', '4']
+   - ~ Spanish preview: lines with no content left out (no ': none'): Words: none
+   - ~ Spanish preview: entries in Spanish: 
+API calls used: 103

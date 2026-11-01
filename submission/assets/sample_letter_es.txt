@@ -1,0 +1,73 @@
+Papá, aquí tienes 8 fotos nuevas de Sample family album, elegidas por Ana.
+Sobre esta carta: Tomadas entre el 3 de mayo de 2026 y el 12 de septiembre de 2026.
+Cómo escuchar: Cada foto empieza con su número, como Foto 1 de 8. Las líneas que empiezan con La familia dice son de Ana, y los nombres vienen solo de sus notas. Las líneas que empiezan con Suposición de la IA las escribió una computadora y pueden estar equivocadas.
+
+Foto 1 de 8.
+Cuándo: copiada o escaneada el 3 de mayo de 2026; la foto en sí puede ser más antigua.
+La familia dice: la abuela Rosa contigo en brazos, el invierno en que naciste.
+Suposición de la IA: En blanco y negro, un adulto sostiene a un bebé.
+
+Foto 2 de 8.
+Cuándo: 14 de junio de 2026, 7:52 de la tarde.
+Dónde: Valparaíso.
+La familia dice: tu torta de cumpleaños de la panadería de la esquina, de chocolate como siempre.
+Suposición de la IA: Un trozo de pastel de chocolate con una decoración blanca sobre un plato blanco con borde amarillo.
+Palabras en la foto, lectura de la IA: Happy Birthday.
+
+Foto 3 de 8.
+Cuándo: 14 de junio de 2026, 8:15 de la noche.
+Dónde: Valparaíso.
+La familia dice: Leo con su polera favorita, la que lleva a cada almuerzo familiar.
+Suposición de la IA: Un adulto lleva una camiseta blanca con un mensaje impreso sobre patentes de software.
+Palabras en la foto, lectura de la IA: Patente de software Não.
+
+Foto 4 de 8.
+Cuándo: 2 de agosto de 2026, 6:40 de la tarde.
+Dónde: Algarrobo.
+La familia dice: Marta y Leo con Luna, después de la caminata larga por la playa.
+Suposición de la IA: Una persona, un perro y otra persona miran el mar desde un banco.
+
+Foto 5 de 8.
+Cuándo: 22 de agosto de 2026, 1:05 de la tarde.
+Dónde: Santiago.
+La familia dice: los invitados afuera, después del matrimonio de Pablo. Tú eres el segundo desde la izquierda.
+Suposición de la IA: Un grupo de adultos posa frente a un coche negro.
+
+Foto 6 de 8.
+Cuándo: 22 de agosto de 2026, 11:48 de la noche.
+Dónde: Santiago.
+La familia dice: el último baile de la noche. La foto salió oscura, pero todos estaban bailando.
+Suposición de la IA: La foto está demasiado oscura y borrosa para distinguir detalles.
+
+Foto 7 de 8.
+Cuándo: 23 de agosto de 2026, según la fecha del archivo, puede estar equivocada.
+Esta foto no se describió. Motivo: documento de identidad personal.
+
+Foto 8 de 8.
+Cuándo: 12 de septiembre de 2026, 6:05 de la tarde.
+Dónde: Vitoria-Gasteiz.
+La familia dice: la calle donde vivía Marta ese año, cerca del mercado antiguo.
+Suposición de la IA: Una señal azul indica la Calle Escoriaza junto a un poste y un árbol.
+Palabras en la foto, lectura de la IA: CALLE ESCORIAZA.
+
+Respuestas de la familia:
+De una carta anterior, foto 2: preguntaste en qué jardín fue la fiesta. Ana dice: en el de la tía Clara, en Quilpué.
+
+Lo que esta carta no puede decirte: La foto 7 no se describió. Tu pregunta sobre la foto 5 de la carta anterior, quién tomó la foto en el lago, sigue con la familia.
+
+De Ana. El resto de esta carta es una lista de archivos para quien te ayuda; puedes dejar de escuchar aquí.
+
+For the helper: photo files
+Keep this part for the next letter. It holds folder names, so remove it from any copy shared outside the family.
+Language: Spanish
+Selection rule: 1
+Newest photo checked: 2026-09-12 18:05:33
+Open question: Photo 5, Listening letter - Sample family album - 2026-04-30 18-20, quién tomó la foto en el lago, asked by Papá.
+Photo 1: Photos/Sample family album/11_bw_adult_baby.jpg
+Photo 2: Photos/Sample family album/12_cake_happy_birthday.jpg
+Photo 3: Photos/Sample family album/16_tshirt_portuguese.jpg
+Photo 4: Photos/Sample family album/08_beach_dog.jpg
+Photo 5: Photos/Sample family album/05_wedding_group.jpg
+Photo 6: Photos/Sample family album/25_dark_blurry_group.jpg
+Photo 7: Photos/Sample family album/22_synthetic_id_card.jpg
+Photo 8: Photos/Sample family album/14_spanish_street_sign.jpg

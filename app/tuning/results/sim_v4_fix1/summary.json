@@ -1,0 +1,251 @@
+{
+ "api_calls": 104,
+ "runs": [
+  {
+   "scenario": "S1",
+   "run": 1,
+   "pass": false,
+   "calls": 11,
+   "steps": [
+    "1",
+    "3",
+    "4",
+    "4",
+    "6",
+    "7",
+    "8"
+   ],
+   "failed_checks": [
+    "every delegate valid (target, quoting, hygiene, slots, traced values)",
+    "saved letter: photo 6 OCR words not marked AI reading"
+   ],
+   "error": null
+  },
+  {
+   "scenario": "S2",
+   "run": 1,
+   "pass": true,
+   "calls": 3,
+   "steps": [
+    "1"
+   ],
+   "failed_checks": [],
+   "error": null
+  },
+  {
+   "scenario": "S3",
+   "run": 1,
+   "pass": true,
+   "calls": 5,
+   "steps": [
+    "1",
+    "1",
+    "3"
+   ],
+   "failed_checks": [],
+   "error": null
+  },
+  {
+   "scenario": "S4",
+   "run": 1,
+   "pass": true,
+   "calls": 11,
+   "steps": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6",
+    "7",
+    "8"
+   ],
+   "failed_checks": [],
+   "error": null
+  },
+  {
+   "scenario": "S5",
+   "run": 1,
+   "pass": false,
+   "calls": 2,
+   "steps": [
+    "Q1"
+   ],
+   "failed_checks": [
+    "delegate sequence",
+    "Q2 vision call made"
+   ],
+   "error": null
+  },
+  {
+   "scenario": "S6",
+   "run": 1,
+   "pass": false,
+   "calls": 6,
+   "steps": [
+    "Q1",
+    "Q2",
+    "Q3"
+   ],
+   "failed_checks": [
+    "delegate sequence",
+    "no vision call for an identity question"
+   ],
+   "error": null
+  },
+  {
+   "scenario": "S7",
+   "run": 1,
+   "pass": true,
+   "calls": 9,
+   "steps": [
+    "1",
+    "3",
+    "4",
+    "6",
+    "7"
+   ],
+   "failed_checks": [],
+   "error": null
+  },
+  {
+   "scenario": "S8",
+   "run": 1,
+   "pass": true,
+   "calls": 5,
+   "steps": [
+    "1",
+    "3",
+    "4"
+   ],
+   "failed_checks": [],
+   "error": null
+  },
+  {
+   "scenario": "S1",
+   "run": 2,
+   "pass": false,
+   "calls": 11,
+   "steps": [
+    "1",
+    "3",
+    "4",
+    "4",
+    "6",
+    "7",
+    "8"
+   ],
+   "failed_checks": [
+    "every delegate valid (target, quoting, hygiene, slots, traced values)",
+    "preview shown with counts",
+    "first preview: Photo 6: real path line"
+   ],
+   "error": null
+  },
+  {
+   "scenario": "S2",
+   "run": 2,
+   "pass": true,
+   "calls": 3,
+   "steps": [
+    "1"
+   ],
+   "failed_checks": [],
+   "error": null
+  },
+  {
+   "scenario": "S3",
+   "run": 2,
+   "pass": true,
+   "calls": 5,
+   "steps": [
+    "1",
+    "1",
+    "3"
+   ],
+   "failed_checks": [],
+   "error": null
+  },
+  {
+   "scenario": "S4",
+   "run": 2,
+   "pass": false,
+   "calls": 11,
+   "steps": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6",
+    "7",
+    "8"
+   ],
+   "failed_checks": [
+    "saved letter: Answers from the family line"
+   ],
+   "error": null
+  },
+  {
+   "scenario": "S5",
+   "run": 2,
+   "pass": false,
+   "calls": 2,
+   "steps": [
+    "Q1"
+   ],
+   "failed_checks": [
+    "delegate sequence",
+    "Q2 vision call made",
+    "reply line AI guess, may be wrong"
+   ],
+   "error": null
+  },
+  {
+   "scenario": "S6",
+   "run": 2,
+   "pass": false,
+   "calls": 6,
+   "steps": [
+    "Q1",
+    "Q2",
+    "6",
+    "Q3"
+   ],
+   "failed_checks": [
+    "delegate sequence",
+    "no vision call for an identity question",
+    "Q3 only after save now"
+   ],
+   "error": null
+  },
+  {
+   "scenario": "S7",
+   "run": 2,
+   "pass": true,
+   "calls": 9,
+   "steps": [
+    "1",
+    "3",
+    "4",
+    "6",
+    "7"
+   ],
+   "failed_checks": [],
+   "error": null
+  },
+  {
+   "scenario": "S8",
+   "run": 2,
+   "pass": true,
+   "calls": 5,
+   "steps": [
+    "1",
+    "3",
+    "4"
+   ],
+   "failed_checks": [
+    "Spanish preview: entries in Spanish"
+   ],
+   "error": null
+  }
+ ]
+}

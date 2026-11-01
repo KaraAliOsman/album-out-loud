@@ -1,0 +1,305 @@
+{
+ "runs": [
+  {
+   "scenario": "S1",
+   "run": 1,
+   "pass": false,
+   "calls": 6,
+   "replayed_turns": 6,
+   "steps": [
+    "1",
+    "3",
+    "4",
+    "4",
+    "6",
+    "7",
+    "8"
+   ],
+   "failed_critical": [
+    "every delegate valid (target, quoting, hygiene, slots, traced values)",
+    "first preview: Photo 6: real path line",
+    "step 7 file name takes the first free number 2",
+    "saved letter: Photo 6: real path line"
+   ],
+   "failed_minor": [
+    "first preview: lines with no content left out (no ': none')",
+    "saved letter: lines with no content left out (no ': none')"
+   ]
+  },
+  {
+   "scenario": "S1",
+   "run": 2,
+   "pass": false,
+   "calls": 8,
+   "replayed_turns": 6,
+   "steps": [
+    "1",
+    "3",
+    "4",
+    "4",
+    "6",
+    "7",
+    "6",
+    "7",
+    "8"
+   ],
+   "failed_critical": [
+    "API calls completed",
+    "delegate sequence",
+    "every delegate valid (target, quoting, hygiene, slots, traced values)",
+    "step 7 file name takes the first free number 2",
+    "final report Saved and checked with path and bytes"
+   ],
+   "failed_minor": [
+    "first preview: lines with no content left out (no ': none')",
+    "saved letter: lines with no content left out (no ': none')"
+   ]
+  },
+  {
+   "scenario": "S2",
+   "run": 1,
+   "pass": true,
+   "calls": 3,
+   "replayed_turns": 0,
+   "steps": [
+    "1"
+   ],
+   "failed_critical": [],
+   "failed_minor": []
+  },
+  {
+   "scenario": "S2",
+   "run": 2,
+   "pass": true,
+   "calls": 3,
+   "replayed_turns": 0,
+   "steps": [
+    "1"
+   ],
+   "failed_critical": [],
+   "failed_minor": []
+  },
+  {
+   "scenario": "S3",
+   "run": 1,
+   "pass": true,
+   "calls": 4,
+   "replayed_turns": 0,
+   "steps": [
+    "1",
+    "3"
+   ],
+   "failed_critical": [],
+   "failed_minor": []
+  },
+  {
+   "scenario": "S3",
+   "run": 2,
+   "pass": true,
+   "calls": 4,
+   "replayed_turns": 0,
+   "steps": [
+    "1",
+    "3"
+   ],
+   "failed_critical": [],
+   "failed_minor": []
+  },
+  {
+   "scenario": "S4",
+   "run": 1,
+   "pass": false,
+   "calls": 9,
+   "replayed_turns": 0,
+   "steps": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6",
+    "7",
+    "8"
+   ],
+   "failed_critical": [
+    "every delegate valid (target, quoting, hygiene, slots, traced values)",
+    "setup message first, no delegate before the reply",
+    "steps 6 and 7 only after the user said save",
+    "brief prompt copied exactly (call 1)",
+    "preview has the since notice",
+    "step 6 base name uses the new newest time and the letter folder"
+   ],
+   "failed_minor": [
+    "saved letter: lines with no content left out (no ': none')"
+   ]
+  },
+  {
+   "scenario": "S4",
+   "run": 2,
+   "pass": false,
+   "calls": 11,
+   "replayed_turns": 0,
+   "steps": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6",
+    "7",
+    "8"
+   ],
+   "failed_critical": [
+    "every delegate valid (target, quoting, hygiene, slots, traced values)",
+    "preview has the since notice",
+    "step 6 base name uses the new newest time and the letter folder"
+   ],
+   "failed_minor": [
+    "saved letter: lines with no content left out (no ': none')"
+   ]
+  },
+  {
+   "scenario": "S5",
+   "run": 1,
+   "pass": false,
+   "calls": 3,
+   "replayed_turns": 0,
+   "steps": [
+    "Q1",
+    "Q2"
+   ],
+   "failed_critical": [
+    "Q2 question holds no name or family word",
+    "Q2 question names a position",
+    "reply line AI guess, may be wrong"
+   ],
+   "failed_minor": []
+  },
+  {
+   "scenario": "S5",
+   "run": 2,
+   "pass": false,
+   "calls": 3,
+   "replayed_turns": 0,
+   "steps": [
+    "Q1",
+    "Q2"
+   ],
+   "failed_critical": [
+    "Q2 question holds no name or family word",
+    "Q2 question names a position",
+    "reply line AI guess, may be wrong"
+   ],
+   "failed_minor": []
+  },
+  {
+   "scenario": "S6",
+   "run": 1,
+   "pass": false,
+   "calls": 4,
+   "replayed_turns": 0,
+   "steps": [
+    "Q1",
+    "Q3"
+   ],
+   "failed_critical": [
+    "every delegate valid (target, quoting, hygiene, slots, traced values)",
+    "Q3 only after save now"
+   ],
+   "failed_minor": []
+  },
+  {
+   "scenario": "S6",
+   "run": 2,
+   "pass": false,
+   "calls": 5,
+   "replayed_turns": 0,
+   "steps": [
+    "Q1",
+    "Q2",
+    "Q3"
+   ],
+   "failed_critical": [
+    "delegate sequence",
+    "every delegate valid (target, quoting, hygiene, slots, traced values)",
+    "no vision call for an identity question",
+    "Q3 only after save now"
+   ],
+   "failed_minor": []
+  },
+  {
+   "scenario": "S7",
+   "run": 1,
+   "pass": false,
+   "calls": 9,
+   "replayed_turns": 0,
+   "steps": [
+    "1",
+    "3",
+    "4",
+    "6",
+    "7"
+   ],
+   "failed_critical": [
+    "every delegate valid (target, quoting, hygiene, slots, traced values)",
+    "letter text sent with the typographic apostrophe (water’s edge)"
+   ],
+   "failed_minor": []
+  },
+  {
+   "scenario": "S7",
+   "run": 2,
+   "pass": false,
+   "calls": 9,
+   "replayed_turns": 0,
+   "steps": [
+    "1",
+    "3",
+    "4",
+    "6",
+    "7"
+   ],
+   "failed_critical": [
+    "every delegate valid (target, quoting, hygiene, slots, traced values)",
+    "letter text sent with the typographic apostrophe (water’s edge)"
+   ],
+   "failed_minor": []
+  },
+  {
+   "scenario": "S8",
+   "run": 1,
+   "pass": true,
+   "calls": 5,
+   "replayed_turns": 0,
+   "steps": [
+    "1",
+    "3",
+    "4"
+   ],
+   "failed_critical": [],
+   "failed_minor": [
+    "Spanish preview: lines with no content left out (no ': none')",
+    "Spanish preview: photo 2 OCR words not marked (AI reading)",
+    "Spanish preview: photo 3 OCR words not marked (AI reading)",
+    "Spanish preview: entries in Spanish"
+   ]
+  },
+  {
+   "scenario": "S8",
+   "run": 2,
+   "pass": true,
+   "calls": 5,
+   "replayed_turns": 0,
+   "steps": [
+    "1",
+    "3",
+    "4"
+   ],
+   "failed_critical": [],
+   "failed_minor": [
+    "Spanish preview: lines with no content left out (no ': none')",
+    "Spanish preview: photo 2 OCR words not marked (AI reading)",
+    "Spanish preview: photo 3 OCR words not marked (AI reading)",
+    "Spanish preview: entries in Spanish"
+   ]
+  }
+ ]
+}

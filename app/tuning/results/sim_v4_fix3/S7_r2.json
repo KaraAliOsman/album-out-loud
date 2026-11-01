@@ -1,0 +1,341 @@
+{
+ "scenario": "S7",
+ "run": 2,
+ "title": "Approval waiting, then denied",
+ "turns": [
+  {
+   "role": "user",
+   "content": "Album Out Loud, a listening letter for my aunt Carmen from the album Toby at the beach. She has low vision."
+  },
+  {
+   "role": "assistant",
+   "content": "Album Out Loud setup. Reply go, or change any line.\n1. Album or photo folder: Toby at the beach\n2. For: your relative, in English\n3. Detail: brief, one AI sentence per photo. Say rich for up to three sentences per photo.\n4. Photos: 6, at most 10\n5. Family notes signed by: the family\n6. Letter: new\n\nI read only this album and your earlier letters, ask the photo expert of the NAS to describe the photos, change nothing in Photos, and save one text file after you approve. Names come only from your notes. The time per photo depends on the NAS model and has not been measured yet. You read the whole letter, say save, then confirm once more if Uliya asks.",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "Line 3: rich. Line 4: 4. Go."
+  },
+  {
+   "role": "assistant",
+   "content": "delegate --target photo-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. If the photo service is unhealthy, return failed and why. Use the photo folder if it is not none, otherwise the album whose name matches exactly. Use only a regular, folder, condition or custom album, never a face, baby, pet, object, location or city album; if only such an album matches, return no results. If several match, return at most 5 with their real UUID and photo count, and stop. Return the real name, album UUID or folder path, and photo count. If nothing matches, return no results with the closest search suggestions. Change nothing. Values: album = Toby at the beach; photo folder = none.'",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "EXPERT RESULT from photo-agent:\n{\n \"status\": \"completed\",\n \"actionsRun\": [\n  \"health\",\n  \"albums\"\n ],\n \"data\": {\n  \"name\": \"Toby at the beach\",\n  \"albumUuid\": \"c0a8f2d1-6e4b-4b7a-8f19-3d5e2a9b7c40\",\n  \"photoCount\": 9\n }\n}"
+  },
+  {
+   "role": "assistant",
+   "content": "delegate --target photo-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. List still photos only, without videos and the screenshot category, paging through as many items as the photo count, sorted by capture time, oldest first. If the start time is not none, keep only photos taken after it, and leave out the already listed paths. If more remain than the limit, apply selection rule 1: keep the oldest and the newest, spread the rest evenly by position, and if a pick shares its minute with the pick before it, take the next photo in a later minute while one remains. Read their metadata in one call. Return the number of photos that qualified before the limit, the number kept, the newest capture time kept as year-month-day hour:minute:second, and per chosen photo, oldest first, P number, capture date and time, camera or file as its time source, the city, area or venue name or none, and the real file path. No street, house number or coordinates. Without capture times, say capture order unknown and newest time unknown. If no still photo remains, say no results. Change nothing. Values: album = Toby at the beach; album UUID or photo folder = c0a8f2d1-6e4b-4b7a-8f19-3d5e2a9b7c40; photo count = 9; limit = 4; start time = none; already listed = none.'",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "EXPERT RESULT from photo-agent:\n{\n \"status\": \"completed\",\n \"actionsRun\": [\n  \"search-picture (file type image, all pages)\",\n  \"search-screen (screenshot)\",\n  \"meta\"\n ],\n \"data\": {\n  \"qualified\": 4,\n  \"kept\": 4,\n  \"newestCaptureTimeKept\": \"2026-08-03 10:12:44\",\n  \"photos\": [\n   {\n    \"P\": 1,\n    \"captureTime\": \"2026-08-03 09:15:02\",\n    \"timeSource\": \"camera\",\n    \"place\": \"Reñaca\",\n    \"path\": \"/volume1/Photos/2026/Toby at the beach/DSC_0211.jpg\"\n   },\n   {\n    \"P\": 2,\n    \"captureTime\": \"2026-08-03 09:31:47\",\n    \"timeSource\": \"camera\",\n    \"place\": \"Reñaca\",\n    \"path\": \"/volume1/Photos/2026/Toby at the beach/DSC_0218.jpg\"\n   },\n   {\n    \"P\": 3,\n    \"captureTime\": \"2026-08-03 09:50:20\",\n    \"timeSource\": \"camera\",\n    \"place\": \"Lago Llanquihue\",\n    \"path\": \"/volume1/Photos/2026/Toby at the beach/DSC_0224.jpg\"\n   },\n   {\n    \"P\": 4,\n    \"captureTime\": \"2026-08-03 10:12:44\",\n    \"timeSource\": \"camera\",\n    \"place\": null,\n    \"path\": \"/volume1/Photos/2026/Toby at the beach/DSC_0230.jpg\"\n   }\n  ]\n }\n}"
+  },
+  {
+   "role": "assistant",
+   "content": "delegate --target photo-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines, and in answer lines, as ’. Use the vision-vlm action of the NAS without setting another model value, and send no photo to another service; if vision-vlm is not available, return failed. For each photo, run vision-vlm once with temperature 0.2, max tokens 170 and this prompt, copied exactly. Prompt begins: You write the spoken description of one family photo for a listener who is blind. Step 1, privacy: if the photo shows an ID card, a bank card, a medical paper, a medical scene, an injury, a bare body, a baby or child who is not fully dressed, such as in a bath, or a phone or computer screen with messages or personal data, write only Not described: and a reason of at most 4 words in English, and nothing else. Step 2, otherwise write exactly three lines and nothing more. Line 1: one sentence in English of 8 to 12 words that starts with the main subject and says what is happening. Line 2: two sentences in English, never more, about only what you can see clearly; leave out a detail you are unsure of, or write possibly once at most. The first sentence, of at most 25 words, covers the people or things in front, with clothing, position from left to right as seen by the viewer and visible action; for more than 5 people, do not list them one by one, but say a group and what most of them wear or do. The second sentence says in English what is behind them, with plain colour names. Line 3: Words: and then the large, clear text that is a main part of the photo, such as a sign, a banner, writing on a cake or a printed shirt, copied letter by letter in its own language and spelling, at most 25 words, or Words: none. Leave out small print, bottle and food labels, logos, watermarks, number plates and any number longer than 4 digits, and never translate. For people, give the number up to 5, otherwise say a group, and call each one a baby, a child or an adult, never man, woman, boy, girl, he or she. In a language with gendered words, use the same form for every adult whatever they look like, such as un adulto in Spanish. Never mention a name, ethnicity, skin, body, looks, age in years, health, disability or religion, and never guess who someone is, how they are related, such as a family or a couple, or what they feel. If the figures are statues, toys, drawings or pictures, say so first, such as a bronze statue of two children. Name an event only when clear objects show it, such as candles on a cake or graduation gowns. If the photo is black and white or an old print, begin Line 1 with the words In black and white or An old print, said in English, never with this photo shows. If the whole photo is too dark or too blurred to see, Line 1 says only that, in English, Line 2 says in English that no details can be seen, Line 3 is Words: none, and you guess nothing. Never begin with this photo shows, the image or a picture of. Keep the labels Line 1, Line 2, Line 3, Words, none and Not described in English. Use no quotation marks, no apostrophes and, in English, no contractions. Prompt ends. If the answer has a Words line, with or without a Line 2 or Line 3 label, that is not Words: none, also run vision-ocr on that photo. Return one record per photo in order: P number, every answer line word for word, and the vision-ocr result or none. If vision-vlm fails on a photo, return its P number, Not described and why. Never describe a photo yourself. Values: photos = P1 /volume1/Photos/2026/Toby at the beach/DSC_0211.jpg; P2 /volume1/Photos/2026/Toby at the beach/DSC_0218.jpg; P3 /volume1/Photos/2026/Toby at the beach/DSC_0224.jpg; P4 /volume1/Photos/2026/Toby at the beach/DSC_0230.jpg.'",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "EXPERT RESULT from photo-agent:\n{\n \"status\": \"completed\",\n \"actionsRun\": [\n  \"vision-vlm\"\n ],\n \"data\": {\n  \"records\": [\n   {\n    \"P\": 1,\n    \"answer\": \"Line 1: A dog sits on a bench with two adults facing the ocean.\\nLine 2: From left to right, an adult in a white hoodie and straw hat, a brown dog, and an adult in a white tank top and cap sit together. Behind them is a sandy beach, blue water, and a group of adults.\\nLine 3: Words: none\",\n    \"visionOcr\": \"none\"\n   },\n   {\n    \"P\": 2,\n    \"answer\": \"Line 1: A white and tan dog sleeps on a black surface outdoors.\\nLine 2: The dog wears a blue collar and lies with its head down. Behind it is green grass, a stone wall, and a wooden bench.\\nLine 3: Words: none\",\n    \"visionOcr\": \"none\"\n   },\n   {\n    \"P\": 3,\n    \"answer\": \"Line 1: A calm lake reflects a snow-capped mountain under a cloudy sky.\\nLine 2: Dark green trees line the shore. Rocks and fallen branches sit at the water’s edge.\\nLine 3: Words: none\",\n    \"visionOcr\": \"none\"\n   },\n   {\n    \"P\": 4,\n    \"answer\": \"Line 1: The photo is too dark and blurred to see.\\nLine 2: No details can be seen.\\nWords: none\",\n    \"visionOcr\": \"none\"\n   }\n  ]\n }\n}"
+  },
+  {
+   "role": "assistant",
+   "content": "Preview: 4 photos qualified, 4 chosen, 1 not described (P4). Nothing is saved yet.\n\nCarmen, here are 4 photos from Toby at the beach, chosen by the family.\n\nAbout this letter: Taken on 3 August 2026, from 9:15 in the morning to 10:12 in the morning.\n\nHow to listen: Each photo starts with its number, such as Photo 1 of 4. Lines that start with Family says are from the family, and names come only from them. Lines that start with AI guess were written by a computer and may be wrong.\n\nPhoto 1 of 4.\nWhen: 3 August 2026, 9:15 in the morning.\nWhere: Reñaca.\nAI guess: A dog sits on a bench with two adults facing the ocean. From left to right, an adult in a white hoodie and straw hat, a brown dog, and an adult in a white tank top and cap sit together. Behind them is a sandy beach, blue water, and a group of adults.\n\nPhoto 2 of 4.\nWhen: 3 August 2026, 9:31 in the morning.\nWhere: Reñaca.\nAI guess: A white and tan dog sleeps on a black surface outdoors. The dog wears a blue collar and lies with its head down. Behind it is green grass, a stone wall, and a wooden bench.\n\nPhoto 3 of 4.\nWhen: 3 August 2026, 9:50 in the morning.\nWhere: Lago Llanquihue.\nAI guess: A calm lake reflects a snow-capped mountain under a cloudy sky. Dark green trees line the shore. Rocks and fallen branches sit at the water’s edge.\n\nPhoto 4 of 4.\nWhen: 3 August 2026, 10:12 in the morning.\nThis photo was not described. Reason: The photo is too dark and blurred to see.\n\nFrom the family. The rest of this letter is a file list for the helper; you can stop listening here.\n\nFor the helper: photo files\nKeep this part for the next letter. It holds folder names, so remove it from any copy shared outside the family.\nLanguage: English\nSelection rule: 1\nNewest photo checked: 2026-08-03 10:12:44\nPhoto 1: /volume1/Photos/2026/Toby at the beach/DSC_0211.jpg\nPhoto 2: /volume1/Photos/2026/Toby at the beach/DSC_0218.jpg\nPhoto 3: /volume1/Photos/2026/Toby at the beach/DSC_0224.jpg\nPhoto 4: /volume1/Photos/2026/Toby at the beach/DSC_0230.jpg\n\nOpen questions from the last letter: none\n\nSend all notes in one message, by photo number, for example 3: my brother Sam, just back from a trip. Type remove and photo numbers to leave photos out. Type answers to open questions as A1, A2. Say save when the letter is ready.",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "save"
+  },
+  {
+   "role": "assistant",
+   "content": "delegate --target file-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. If the folder is none, use the personal folder of the user. Return the real path of that folder and the names of its files that start with the name value, or none. Change nothing. Values: folder = none; name = Listening letter - Toby at the beach - 2026-08-03 10-12.'",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "EXPERT RESULT from file-agent:\n{\n \"status\": \"completed\",\n \"actionsRun\": [\n  \"get-user-dir\",\n  \"find\"\n ],\n \"data\": {\n  \"folder\": \"/volume1/homes/ana\",\n  \"filesStartingWithName\": \"none\"\n }\n}"
+  },
+  {
+   "role": "assistant",
+   "content": "delegate --target knowledge-agent --instruction 'Save the letter text below as one new text file. The text is sent as one line: turn each ¶ sign and the spaces around it into one line break, so ¶ ¶ gives an empty line, and change nothing else; no rewriting, shortening or translating. In the folder and file name only, a ’ may be a straight apostrophe. Never overwrite a file; if the name exists, return failed. Return the real output path, with every straight apostrophe written as ’, the size in bytes and whether the save was verified. Values: folder = /volume1/homes/ana; file name = Listening letter - Toby at the beach - 2026-08-03 10-12.txt; letter text = Carmen, here are 4 photos from Toby at the beach, chosen by the family. ¶ About this letter: Taken on 3 August 2026, from 9:15 in the morning to 10:12 in the morning. ¶ How to listen: Each photo starts with its number, such as Photo 1 of 4. Lines that start with Family says are from the family, and names come only from them. Lines that start with AI guess were written by a computer and may be wrong. ¶ ¶ Photo 1 of 4. ¶ When: 3 August 2026, 9:15 in the morning. ¶ Where: Reñaca. ¶ AI guess: A dog sits on a bench with two adults facing the ocean. From left to right, an adult in a white hoodie and straw hat, a brown dog, and an adult in a white tank top and cap sit together. Behind them is a sandy beach, blue water, and a group of adults. ¶ ¶ Photo 2 of 4. ¶ When: 3 August 2026, 9:31 in the morning. ¶ Where: Reñaca. ¶ AI guess: A white and tan dog sleeps on a black surface outdoors. The dog wears a blue collar and lies with its head down. Behind it is green grass, a stone wall, and a wooden bench. ¶ ¶ Photo 3 of 4. ¶ When: 3 August 2026, 9:50 in the morning. ¶ Where: Lago Llanquihue. ¶ AI guess: A calm lake reflects a snow-capped mountain under a cloudy sky. Dark green trees line the shore. Rocks and fallen branches sit at the water’s edge. ¶ ¶ Photo 4 of 4. ¶ When: 3 August 2026, 10:12 in the morning. ¶ This photo was not described. Reason: The photo is too dark and blurred to see. ¶ ¶ From the family. The rest of this letter is a file list for the helper; you can stop listening here. ¶ ¶ For the helper: photo files ¶ Keep this part for the next letter. It holds folder names, so remove it from any copy shared outside the family. ¶ Language: English ¶ Selection rule: 1 ¶ Newest photo checked: 2026-08-03 10:12:44 ¶ Photo 1: /volume1/Photos/2026/Toby at the beach/DSC_0211.jpg ¶ Photo 2: /volume1/Photos/2026/Toby at the beach/DSC_0218.jpg ¶ Photo 3: /volume1/Photos/2026/Toby at the beach/DSC_0224.jpg ¶ Photo 4: /volume1/Photos/2026/Toby at the beach/DSC_0230.jpg'",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "EXPERT RESULT from knowledge-agent:\n{\n \"status\": \"waiting_approval\",\n \"approvalRequest\": \"knowledge-agent wants to save one new text file: Listening letter - Toby at the beach - 2026-08-03 10-12.txt in /volume1/homes/ana. Approve or deny.\",\n \"note\": \"Nothing is saved until the user approves in the dialog.\"\n}"
+  },
+  {
+   "role": "assistant",
+   "content": "The platform is waiting for your approval to save the letter file:\n\nListening letter - Toby at the beach - 2026-08-03 10-12.txt\nin /volume1/homes/ana\n\nPlease approve or deny in the dialog. Nothing is saved yet.",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "[Platform] The user pressed Deny in the approval dialog.\nEXPERT RESULT from knowledge-agent:\n{\"status\": \"cancelled\", \"reason\": \"approval denied by the user\", \"saved\": false}"
+  },
+  {
+   "role": "assistant",
+   "content": "Nothing was saved. Here is the letter again; say save to try again.\n\nCarmen, here are 4 photos from Toby at the beach, chosen by the family.\n\nAbout this letter: Taken on 3 August 2026, from 9:15 in the morning to 10:12 in the morning.\n\nHow to listen: Each photo starts with its number, such as Photo 1 of 4. Lines that start with Family says are from the family, and names come only from them. Lines that start with AI guess were written by a computer and may be wrong.\n\nPhoto 1 of 4.\nWhen: 3 August 2026, 9:15 in the morning.\nWhere: Reñaca.\nAI guess: A dog sits on a bench with two adults facing the ocean. From left to right, an adult in a white hoodie and straw hat, a brown dog, and an adult in a white tank top and cap sit together. Behind them is a sandy beach, blue water, and a group of adults.\n\nPhoto 2 of 4.\nWhen: 3 August 2026, 9:31 in the morning.\nWhere: Reñaca.\nAI guess: A white and tan dog sleeps on a black surface outdoors. The dog wears a blue collar and lies with its head down. Behind it is green grass, a stone wall, and a wooden bench.\n\nPhoto 3 of 4.\nWhen: 3 August 2026, 9:50 in the morning.\nWhere: Lago Llanquihue.\nAI guess: A calm lake reflects a snow-capped mountain under a cloudy sky. Dark green trees line the shore. Rocks and fallen branches sit at the water’s edge.\n\nPhoto 4 of 4.\nWhen: 3 August 2026, 10:12 in the morning.\nThis photo was not described. Reason: The photo is too dark and blurred to see.\n\nFrom the family. The rest of this letter is a file list for the helper; you can stop listening here.\n\nFor the helper: photo files\nKeep this part for the next letter. It holds folder names, so remove it from any copy shared outside the family.\nLanguage: English\nSelection rule: 1\nNewest photo checked: 2026-08-03 10:12:44\nPhoto 1: /volume1/Photos/2026/Toby at the beach/DSC_0211.jpg\nPhoto 2: /volume1/Photos/2026/Toby at the beach/DSC_0218.jpg\nPhoto 3: /volume1/Photos/2026/Toby at the beach/DSC_0224.jpg\nPhoto 4: /volume1/Photos/2026/2026/Toby at the beach/DSC_0230.jpg",
+   "finish": "stop"
+  }
+ ],
+ "delegates": [
+  {
+   "turn": 3,
+   "step": "1",
+   "target": "photo-agent",
+   "instruction": "Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. If the photo service is unhealthy, return failed and why. Use the photo folder if it is not none, otherwise the album whose name matches exactly. Use only a regular, folder, condition or custom album, never a face, baby, pet, object, location or city album; if only such an album matches, return no results. If several match, return at most 5 with their real UUID and photo count, and stop. Return the real name, album UUID or folder path, and photo count. If nothing matches, return no results with the closest search suggestions. Change nothing. Values: album = Toby at the beach; photo folder = none.",
+   "issues": [],
+   "result": {
+    "status": "completed",
+    "actionsRun": [
+     "health",
+     "albums"
+    ],
+    "data": {
+     "name": "Toby at the beach",
+     "albumUuid": "c0a8f2d1-6e4b-4b7a-8f19-3d5e2a9b7c40",
+     "photoCount": 9
+    }
+   },
+   "chat_before": ""
+  },
+  {
+   "turn": 5,
+   "step": "3",
+   "target": "photo-agent",
+   "instruction": "Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. List still photos only, without videos and the screenshot category, paging through as many items as the photo count, sorted by capture time, oldest first. If the start time is not none, keep only photos taken after it, and leave out the already listed paths. If more remain than the limit, apply selection rule 1: keep the oldest and the newest, spread the rest evenly by position, and if a pick shares its minute with the pick before it, take the next photo in a later minute while one remains. Read their metadata in one call. Return the number of photos that qualified before the limit, the number kept, the newest capture time kept as year-month-day hour:minute:second, and per chosen photo, oldest first, P number, capture date and time, camera or file as its time source, the city, area or venue name or none, and the real file path. No street, house number or coordinates. Without capture times, say capture order unknown and newest time unknown. If no still photo remains, say no results. Change nothing. Values: album = Toby at the beach; album UUID or photo folder = c0a8f2d1-6e4b-4b7a-8f19-3d5e2a9b7c40; photo count = 9; limit = 4; start time = none; already listed = none.",
+   "issues": [],
+   "result": {
+    "status": "completed",
+    "actionsRun": [
+     "search-picture (file type image, all pages)",
+     "search-screen (screenshot)",
+     "meta"
+    ],
+    "data": {
+     "qualified": 4,
+     "kept": 4,
+     "newestCaptureTimeKept": "2026-08-03 10:12:44",
+     "photos": [
+      {
+       "P": 1,
+       "captureTime": "2026-08-03 09:15:02",
+       "timeSource": "camera",
+       "place": "Reñaca",
+       "path": "/volume1/Photos/2026/Toby at the beach/DSC_0211.jpg"
+      },
+      {
+       "P": 2,
+       "captureTime": "2026-08-03 09:31:47",
+       "timeSource": "camera",
+       "place": "Reñaca",
+       "path": "/volume1/Photos/2026/Toby at the beach/DSC_0218.jpg"
+      },
+      {
+       "P": 3,
+       "captureTime": "2026-08-03 09:50:20",
+       "timeSource": "camera",
+       "place": "Lago Llanquihue",
+       "path": "/volume1/Photos/2026/Toby at the beach/DSC_0224.jpg"
+      },
+      {
+       "P": 4,
+       "captureTime": "2026-08-03 10:12:44",
+       "timeSource": "camera",
+       "place": null,
+       "path": "/volume1/Photos/2026/Toby at the beach/DSC_0230.jpg"
+      }
+     ]
+    }
+   },
+   "chat_before": ""
+  },
+  {
+   "turn": 7,
+   "step": "4",
+   "target": "photo-agent",
+   "instruction": "Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines, and in answer lines, as ’. Use the vision-vlm action of the NAS without setting another model value, and send no photo to another service; if vision-vlm is not available, return failed. For each photo, run vision-vlm once with temperature 0.2, max tokens 170 and this prompt, copied exactly. Prompt begins: You write the spoken description of one family photo for a listener who is blind. Step 1, privacy: if the photo shows an ID card, a bank card, a medical paper, a medical scene, an injury, a bare body, a baby or child who is not fully dressed, such as in a bath, or a phone or computer screen with messages or personal data, write only Not described: and a reason of at most 4 words in English, and nothing else. Step 2, otherwise write exactly three lines and nothing more. Line 1: one sentence in English of 8 to 12 words that starts with the main subject and says what is happening. Line 2: two sentences in English, never more, about only what you can see clearly; leave out a detail you are unsure of, or write possibly once at most. The first sentence, of at most 25 words, covers the people or things in front, with clothing, position from left to right as seen by the viewer and visible action; for more than 5 people, do not list them one by one, but say a group and what most of them wear or do. The second sentence says in English what is behind them, with plain colour names. Line 3: Words: and then the large, clear text that is a main part of the photo, such as a sign, a banner, writing on a cake or a printed shirt, copied letter by letter in its own language and spelling, at most 25 words, or Words: none. Leave out small print, bottle and food labels, logos, watermarks, number plates and any number longer than 4 digits, and never translate. For people, give the number up to 5, otherwise say a group, and call each one a baby, a child or an adult, never man, woman, boy, girl, he or she. In a language with gendered words, use the same form for every adult whatever they look like, such as un adulto in Spanish. Never mention a name, ethnicity, skin, body, looks, age in years, health, disability or religion, and never guess who someone is, how they are related, such as a family or a couple, or what they feel. If the figures are statues, toys, drawings or pictures, say so first, such as a bronze statue of two children. Name an event only when clear objects show it, such as candles on a cake or graduation gowns. If the photo is black and white or an old print, begin Line 1 with the words In black and white or An old print, said in English, never with this photo shows. If the whole photo is too dark or too blurred to see, Line 1 says only that, in English, Line 2 says in English that no details can be seen, Line 3 is Words: none, and you guess nothing. Never begin with this photo shows, the image or a picture of. Keep the labels Line 1, Line 2, Line 3, Words, none and Not described in English. Use no quotation marks, no apostrophes and, in English, no contractions. Prompt ends. If the answer has a Words line, with or without a Line 2 or Line 3 label, that is not Words: none, also run vision-ocr on that photo. Return one record per photo in order: P number, every answer line word for word, and the vision-ocr result or none. If vision-vlm fails on a photo, return its P number, Not described and why. Never describe a photo yourself. Values: photos = P1 /volume1/Photos/2026/Toby at the beach/DSC_0211.jpg; P2 /volume1/Photos/2026/Toby at the beach/DSC_0218.jpg; P3 /volume1/Photos/2026/Toby at the beach/DSC_0224.jpg; P4 /volume1/Photos/2026/Toby at the beach/DSC_0230.jpg.",
+   "issues": [],
+   "result": {
+    "status": "completed",
+    "actionsRun": [
+     "vision-vlm"
+    ],
+    "data": {
+     "records": [
+      {
+       "P": 1,
+       "answer": "Line 1: A dog sits on a bench with two adults facing the ocean.\nLine 2: From left to right, an adult in a white hoodie and straw hat, a brown dog, and an adult in a white tank top and cap sit together. Behind them is a sandy beach, blue water, and a group of adults.\nLine 3: Words: none",
+       "visionOcr": "none"
+      },
+      {
+       "P": 2,
+       "answer": "Line 1: A white and tan dog sleeps on a black surface outdoors.\nLine 2: The dog wears a blue collar and lies with its head down. Behind it is green grass, a stone wall, and a wooden bench.\nLine 3: Words: none",
+       "visionOcr": "none"
+      },
+      {
+       "P": 3,
+       "answer": "Line 1: A calm lake reflects a snow-capped mountain under a cloudy sky.\nLine 2: Dark green trees line the shore. Rocks and fallen branches sit at the water’s edge.\nLine 3: Words: none",
+       "visionOcr": "none"
+      },
+      {
+       "P": 4,
+       "answer": "Line 1: The photo is too dark and blurred to see.\nLine 2: No details can be seen.\nWords: none",
+       "visionOcr": "none"
+      }
+     ]
+    }
+   },
+   "chat_before": ""
+  },
+  {
+   "turn": 11,
+   "step": "6",
+   "target": "file-agent",
+   "instruction": "Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. If the folder is none, use the personal folder of the user. Return the real path of that folder and the names of its files that start with the name value, or none. Change nothing. Values: folder = none; name = Listening letter - Toby at the beach - 2026-08-03 10-12.",
+   "issues": [],
+   "result": {
+    "status": "completed",
+    "actionsRun": [
+     "get-user-dir",
+     "find"
+    ],
+    "data": {
+     "folder": "/volume1/homes/ana",
+     "filesStartingWithName": "none"
+    }
+   },
+   "chat_before": ""
+  },
+  {
+   "turn": 13,
+   "step": "7",
+   "target": "knowledge-agent",
+   "instruction": "Save the letter text below as one new text file. The text is sent as one line: turn each ¶ sign and the spaces around it into one line break, so ¶ ¶ gives an empty line, and change nothing else; no rewriting, shortening or translating. In the folder and file name only, a ’ may be a straight apostrophe. Never overwrite a file; if the name exists, return failed. Return the real output path, with every straight apostrophe written as ’, the size in bytes and whether the save was verified. Values: folder = /volume1/homes/ana; file name = Listening letter - Toby at the beach - 2026-08-03 10-12.txt; letter text = Carmen, here are 4 photos from Toby at the beach, chosen by the family. ¶ About this letter: Taken on 3 August 2026, from 9:15 in the morning to 10:12 in the morning. ¶ How to listen: Each photo starts with its number, such as Photo 1 of 4. Lines that start with Family says are from the family, and names come only from them. Lines that start with AI guess were written by a computer and may be wrong. ¶ ¶ Photo 1 of 4. ¶ When: 3 August 2026, 9:15 in the morning. ¶ Where: Reñaca. ¶ AI guess: A dog sits on a bench with two adults facing the ocean. From left to right, an adult in a white hoodie and straw hat, a brown dog, and an adult in a white tank top and cap sit together. Behind them is a sandy beach, blue water, and a group of adults. ¶ ¶ Photo 2 of 4. ¶ When: 3 August 2026, 9:31 in the morning. ¶ Where: Reñaca. ¶ AI guess: A white and tan dog sleeps on a black surface outdoors. The dog wears a blue collar and lies with its head down. Behind it is green grass, a stone wall, and a wooden bench. ¶ ¶ Photo 3 of 4. ¶ When: 3 August 2026, 9:50 in the morning. ¶ Where: Lago Llanquihue. ¶ AI guess: A calm lake reflects a snow-capped mountain under a cloudy sky. Dark green trees line the shore. Rocks and fallen branches sit at the water’s edge. ¶ ¶ Photo 4 of 4. ¶ When: 3 August 2026, 10:12 in the morning. ¶ This photo was not described. Reason: The photo is too dark and blurred to see. ¶ ¶ From the family. The rest of this letter is a file list for the helper; you can stop listening here. ¶ ¶ For the helper: photo files ¶ Keep this part for the next letter. It holds folder names, so remove it from any copy shared outside the family. ¶ Language: English ¶ Selection rule: 1 ¶ Newest photo checked: 2026-08-03 10:12:44 ¶ Photo 1: /volume1/Photos/2026/Toby at the beach/DSC_0211.jpg ¶ Photo 2: /volume1/Photos/2026/Toby at the beach/DSC_0218.jpg ¶ Photo 3: /volume1/Photos/2026/Toby at the beach/DSC_0224.jpg ¶ Photo 4: /volume1/Photos/2026/Toby at the beach/DSC_0230.jpg",
+   "issues": [],
+   "result": {
+    "status": "waiting_approval",
+    "approvalRequest": "knowledge-agent wants to save one new text file: Listening letter - Toby at the beach - 2026-08-03 10-12.txt in /volume1/homes/ana. Approve or deny.",
+    "note": "Nothing is saved until the user approves in the dialog."
+   },
+   "chat_before": ""
+  }
+ ],
+ "protocol": [],
+ "error": null,
+ "calls": 9,
+ "replayed_turns": 0,
+ "ctx": {
+  "setup_reply": true,
+  "save_said": true,
+  "approval_pending": true,
+  "denied": true
+ },
+ "saved_text": "Carmen, here are 4 photos from Toby at the beach, chosen by the family.\nAbout this letter: Taken on 3 August 2026, from 9:15 in the morning to 10:12 in the morning.\nHow to listen: Each photo starts with its number, such as Photo 1 of 4. Lines that start with Family says are from the family, and names come only from them. Lines that start with AI guess were written by a computer and may be wrong.\n\nPhoto 1 of 4.\nWhen: 3 August 2026, 9:15 in the morning.\nWhere: Reñaca.\nAI guess: A dog sits on a bench with two adults facing the ocean. From left to right, an adult in a white hoodie and straw hat, a brown dog, and an adult in a white tank top and cap sit together. Behind them is a sandy beach, blue water, and a group of adults.\n\nPhoto 2 of 4.\nWhen: 3 August 2026, 9:31 in the morning.\nWhere: Reñaca.\nAI guess: A white and tan dog sleeps on a black surface outdoors. The dog wears a blue collar and lies with its head down. Behind it is green grass, a stone wall, and a wooden bench.\n\nPhoto 3 of 4.\nWhen: 3 August 2026, 9:50 in the morning.\nWhere: Lago Llanquihue.\nAI guess: A calm lake reflects a snow-capped mountain under a cloudy sky. Dark green trees line the shore. Rocks and fallen branches sit at the water’s edge.\n\nPhoto 4 of 4.\nWhen: 3 August 2026, 10:12 in the morning.\nThis photo was not described. Reason: The photo is too dark and blurred to see.\n\nFrom the family. The rest of this letter is a file list for the helper; you can stop listening here.\n\nFor the helper: photo files\nKeep this part for the next letter. It holds folder names, so remove it from any copy shared outside the family.\nLanguage: English\nSelection rule: 1\nNewest photo checked: 2026-08-03 10:12:44\nPhoto 1: /volume1/Photos/2026/Toby at the beach/DSC_0211.jpg\nPhoto 2: /volume1/Photos/2026/Toby at the beach/DSC_0218.jpg\nPhoto 3: /volume1/Photos/2026/Toby at the beach/DSC_0224.jpg\nPhoto 4: /volume1/Photos/2026/Toby at the beach/DSC_0230.jpg",
+ "checks": [
+  {
+   "name": "delegate sequence",
+   "ok": true,
+   "detail": "got ['1', '3', '4', '6', '7'], expected ['1', '3', '4', '6', '7']",
+   "critical": true
+  },
+  {
+   "name": "every delegate valid (target, quoting, hygiene, slots, traced values)",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "one command per message",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "never writes an expert result itself",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "setup message first, no delegate before the reply",
+   "ok": true,
+   "detail": "Album Out Loud setup. Reply go, or change any line.\n1. Album or photo folder: Toby at the beach\n2. For: your relative, in English\n3. Detail: brief, one AI sente",
+   "critical": true
+  },
+  {
+   "name": "steps 6 and 7 only after the user said save",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "rich prompt copied exactly (call 1)",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "rich max tokens 170 (call 1)",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "rich AI guess keeps Line 1 and Line 2 (4 photos)",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "letter text sent with the typographic apostrophe (water’s edge)",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "photo 4 too dark: no guessing beyond the model words",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "waiting_approval: shows the request and claims no save",
+   "ok": true,
+   "detail": "The platform is waiting for your approval to save the letter file:\n\nListening letter - Toby at the beach - 2026-08-03 10-12.txt\nin /volume1/homes/ana\n\nPlease approve or deny in the dialog. Nothing is ",
+   "critical": true
+  },
+  {
+   "name": "waiting_approval: no new delegate while waiting",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "denied: says nothing was saved",
+   "ok": true,
+   "detail": "Nothing was saved. Here is the letter again; say save to try again.\n\nCarmen, here are 4 photos from Toby at the beach, chosen by the family.\n\nAbout this letter: Taken on 3 August 2026, from 9:15 in th",
+   "critical": true
+  },
+  {
+   "name": "denied: shows the letter in chat",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "denied: no repeated save",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  }
+ ],
+ "pass": true
+}

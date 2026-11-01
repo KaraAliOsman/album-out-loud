@@ -1,0 +1,120 @@
+{
+ "api_calls": 52,
+ "runs": [
+  {
+   "scenario": "S1",
+   "run": 3,
+   "pass": false,
+   "calls": 11,
+   "steps": [
+    "1",
+    "3",
+    "4",
+    "4",
+    "6",
+    "7",
+    "8"
+   ],
+   "failed_checks": [
+    "every delegate valid (target, quoting, hygiene, slots, traced values)"
+   ],
+   "error": null
+  },
+  {
+   "scenario": "S2",
+   "run": 3,
+   "pass": true,
+   "calls": 3,
+   "steps": [
+    "1"
+   ],
+   "failed_checks": [],
+   "error": null
+  },
+  {
+   "scenario": "S3",
+   "run": 3,
+   "pass": true,
+   "calls": 5,
+   "steps": [
+    "1",
+    "1",
+    "3"
+   ],
+   "failed_checks": [],
+   "error": null
+  },
+  {
+   "scenario": "S4",
+   "run": 3,
+   "pass": true,
+   "calls": 11,
+   "steps": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6",
+    "7",
+    "8"
+   ],
+   "failed_checks": [],
+   "error": null
+  },
+  {
+   "scenario": "S5",
+   "run": 3,
+   "pass": true,
+   "calls": 3,
+   "steps": [
+    "Q1",
+    "Q2"
+   ],
+   "failed_checks": [],
+   "error": null
+  },
+  {
+   "scenario": "S6",
+   "run": 3,
+   "pass": true,
+   "calls": 5,
+   "steps": [
+    "Q1",
+    "Q3"
+   ],
+   "failed_checks": [],
+   "error": null
+  },
+  {
+   "scenario": "S7",
+   "run": 3,
+   "pass": true,
+   "calls": 9,
+   "steps": [
+    "1",
+    "3",
+    "4",
+    "6",
+    "7"
+   ],
+   "failed_checks": [],
+   "error": null
+  },
+  {
+   "scenario": "S8",
+   "run": 3,
+   "pass": true,
+   "calls": 5,
+   "steps": [
+    "1",
+    "3",
+    "4"
+   ],
+   "failed_checks": [
+    "Spanish preview: photo 3 OCR words not marked AI reading",
+    "Spanish preview: entries in Spanish"
+   ],
+   "error": null
+  }
+ ]
+}

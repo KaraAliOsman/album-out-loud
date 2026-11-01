@@ -1,0 +1,63 @@
+{
+ "api_calls": 15,
+ "runs": [
+  {
+   "scenario": "S5",
+   "run": 1,
+   "pass": true,
+   "calls": 3,
+   "steps": [
+    "Q1",
+    "Q2"
+   ],
+   "failed_checks": [],
+   "error": null
+  },
+  {
+   "scenario": "S6",
+   "run": 1,
+   "pass": false,
+   "calls": 5,
+   "steps": [
+    "Q1",
+    "6",
+    "Q3"
+   ],
+   "failed_checks": [
+    "delegate sequence",
+    "Q3 only after save now"
+   ],
+   "error": null
+  },
+  {
+   "scenario": "S5",
+   "run": 2,
+   "pass": false,
+   "calls": 2,
+   "steps": [
+    "Q1"
+   ],
+   "failed_checks": [
+    "delegate sequence",
+    "Q2 vision call made"
+   ],
+   "error": null
+  },
+  {
+   "scenario": "S6",
+   "run": 2,
+   "pass": false,
+   "calls": 5,
+   "steps": [
+    "Q1",
+    "6",
+    "Q3"
+   ],
+   "failed_checks": [
+    "delegate sequence",
+    "Q3 only after save now"
+   ],
+   "error": null
+  }
+ ]
+}

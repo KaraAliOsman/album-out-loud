@@ -1,0 +1,153 @@
+---
+name: album-out-loud
+description: Lets a blind or low-vision relative listen to one family album or photo folder on the NAS with a screen reader, one numbered photo at a time, and ask about photo N through a helper; what the photos cannot answer is kept for the family and answered in the next listening letter. Every line names its source (When, Where, Family says, AI guess, Words in the photo), so the listener can tell what the family said from what a computer guessed. It asks the photo expert to use the vision-vlm action of the NAS, never identifies faces, changes nothing in Photos, and saves one text file after the helper approves. Use when the user asks to describe or read out an album, folder or event photos for someone who is blind, has low vision or uses a screen reader, asks for a listening letter or the new photos since the last letter, or relays a question about photo N of a letter, even if the words listening letter are not used.
+---
+# Goal
+One saved listening letter per album for a relative who cannot see the photos: a numbered entry per photo, each line naming its source, family notes before the AI guess. A sighted helper reads the whole letter before the single save.
+
+Limits: names only from the helper, never from faces or face albums. Photos is never changed. Photos are sent only to the vision-vlm and vision-ocr actions of the NAS photo expert, with no model value set; whether that model runs on the NAS itself is not verified. No guesses about identity, relationships, gender, age in years or feelings; people are only counted as a baby, a child or an adult. Private or medical photos stay Not described.
+
+# Required input
+Letter mode, new or since the last letter: your first reply is always this message, never a command, even when the request already gives every value. Fill it with what the user said and wait for one reply. Unchanged lines keep their default. A reply that contains go starts step 1 at once, with any changes it holds.
+
+```text
+Album Out Loud setup. Reply go, or change any line.
+1. Album or photo folder: {album or photo folder, or ask which one}
+2. For: {listener, default your relative}, in {language, default the language of this request}
+3. Detail: brief, one AI sentence per photo. Say rich for up to three sentences per photo.
+4. Photos: {limit, default 6, at most 10}
+5. Family notes signed by: {helper, default the family}
+6. Letter: {new or since the last letter, default new unless the request says since}
+I read only this album and your earlier letters, ask the photo expert of the NAS to describe the photos, change nothing in Photos, and save one text file after you approve. Names come only from your notes. The time per photo depends on the NAS model and has not been measured yet. You read the whole letter, say save, then confirm once more if Uliya asks.
+```
+
+A folder with no album: album = last part of the folder name. The language always comes from setup line 2, never from place names or examples. Question mode: no setup message; ask only for a missing album; listener = your relative, helper = the family, language = the Language line from Q1, else English. Keep all along: album, photo folder (default none), listener, language (in English, such as Spanish), detail, limit, helper, letter folder, questions kept for the family.
+
+# Generation-time capability evidence
+
+- `ug-photo` → `photo-agent`
+- `ug-knowledge` → `knowledge-agent`
+- `ug-filesystem` → `file-agent`
+- `file-workflow` → `file-agent`
+
+# Workflow
+A question about photo N of a letter: Question mode. An album request: Letter mode; first the setup message, for since requests too, then since the last letter runs steps 1 to 8, new skips step 2.
+
+Delegate rules:
+- Pass only the real result of each upstream step downstream, never an example value: [filled instructions](references/filled-instructions.md). Replace every {name}; if one is missing, stop and say which.
+- One command at a time; wait for its result.
+- No results: say so and stop (except the answers-only letter, step 3); never widen the scope. No previous letter in since mode: offer a new letter.
+- Several matches in step 1, step 2 or Q1: keep the names, let the user pick, then send that step again with the exact name, with no new setup message.
+- Experts and approvals per step: [capability map](references/capability-map.md).
+
+Check each command first:
+1. One line, always. In steps 7 and Q3, write each line break of the text as the sign ¶ with a space on each side; an empty line is ¶ ¶.
+2. Single quotes around the instruction; inside, no double quotes, and ’ for every straight apostrophe, in paths, names and the letter too.
+3. Copied text has no backticks, two hyphens in a row, greater-than, less-than or vertical bar signs, dollar sign before a parenthesis, or two ampersands in a row.
+4. Never change a real path or name otherwise. If one holds a sign from rule 3 or a double quote, leave the photo out (preview: file name not supported), or ask to rename the album or folder.
+5. In file names, slashes, backslashes and colons in the album name become dashes.
+6. In family notes, questions and AI text, write two hyphens as one, drop the other signs of rule 3 and any double quote. Never leave out the note itself.
+
+## Letter mode
+
+1. Find the album.
+   delegate --target photo-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. If the photo service is unhealthy, return failed and why. Use the photo folder if it is not none, otherwise the album whose name matches exactly. Use only a regular, folder, condition or custom album, never a face, baby, pet, object, location or city album; if only such an album matches, return no results. If several match, return at most 5 with their real UUID and photo count, and stop. Return the real name, album UUID or folder path, and photo count. If nothing matches, return no results with the closest search suggestions. Change nothing. Values: album = {album}; photo folder = {photo folder or none}.'
+   Keep: album name, UUID or folder path, photo count.
+
+2. Since mode: previous letter and open questions.
+   delegate --target file-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. In the personal folder of the user and its subfolders, find files named Listening letter, a dash, the album value and a dash, matching case and spacing loosely. If several albums match, return at most 3 names and stop. Take the latest date and time in the name, then the highest end number, and read it whole. Return its real path, folder and file name, and under For the helper: photo files the Newest photo checked line, every Open question line and every Photo line. In that folder, return the lines of the files named Listener questions, a dash and that letter name without its ending, at most 10 questions. If no letter matches, say no results. Change nothing. Values: album = {album name as in file names}.'
+   Keep: letter name, letter folder (the folder of that letter), newest checked time (none if unknown), photo paths, open questions.
+
+3. Choose the photos.
+   delegate --target photo-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. List still photos only, without videos and the screenshot category, paging through as many items as the photo count, sorted by capture time, oldest first. If the start time is not none, keep only photos taken after it, and leave out the already listed paths. If more remain than the limit, apply selection rule 1: keep the oldest and the newest, spread the rest evenly by position, and if a pick shares its minute with the pick before it, take the next photo in a later minute while one remains. Read their metadata in one call. Return the number of photos that qualified before the limit, the number kept, the newest capture time kept as year-month-day hour:minute:second, and per chosen photo, oldest first, P number, capture date and time, camera or file as its time source, the city, area or venue name or none, and the real file path. No street, house number or coordinates. Without capture times, say capture order unknown and newest time unknown. If no still photo remains, say no results. Change nothing. Values: album = {album name}; album UUID or photo folder = {album UUID or folder path}; photo count = {photo count}; limit = {limit}; start time = {newest checked time or none}; already listed = {previous photo paths or none}.'
+   Keep: P1 to PM, K (the number that qualified), newest checked time, whether capture order is unknown. No results but open questions in since mode: offer the answers-only letter (letter format reference), then step 5.
+
+4. Describe the photos in groups of at most 4: one command for P1 to P4, wait, then one for P5 to P8, wait, then one for P9 and P10. Never put 5 or more photos in one command. Read [vision prompts](references/vision-prompts.md): brief uses max tokens 90 and the brief prompt, rich 170 and the rich prompt, copied exactly as one line with {language} replaced.
+   delegate --target photo-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines, and in answer lines, as ’. Use the vision-vlm action of the NAS without setting another model value, and send no photo to another service; if vision-vlm is not available, return failed. For each photo, run vision-vlm once with temperature 0.2, max tokens {max tokens} and this prompt, copied exactly. Prompt begins: {vision prompt} Prompt ends. If the answer has a Words line, with or without a Line 2 or Line 3 label, that is not Words: none, also run vision-ocr on that photo. Return one record per photo in order: P number, every answer line word for word, and the vision-ocr result or none. If vision-vlm fails on a photo, return its P number, Not described and why. Never describe a photo yourself. Values: photos = {P number and real path of each photo in this group}.'
+   Missing P numbers and failed groups are sent again once, then Not described (no answer returned, or vision model failed). If vision-vlm is not available or no photo is described, report failed before the preview.
+
+5. Preview in chat, no delegate. Read [letter format](references/letter-format.md) and build the whole letter, every part from the opening line to the last Photo N: line, without Family says lines. Everything the listener hears, labels and dates included, is in the listener language. The part For the helper: photo files stays word for word in English in every language: its title and its lines Keep this part, Language, Selection rule, Newest photo checked, Open question and Photo N:, because later runs read them back. Leave out any Where or Words in the photo line that would say none. Words in the photo: no mark when every word of the Words line is also in the vision-ocr result; otherwise the label Words in the photo, AI reading. Never add other vision-ocr text, and leave out numbers of 5 or more digits, number plates, phone numbers and addresses. Show, and wait:
+
+```text
+Preview: {K} photos qualified, {M} chosen, {X} not described ({photo numbers or none}). Nothing is saved yet.
+{since notice, only in since mode}
+{capture order notice, only if capture order is unknown}
+{the full letter, every part in this order: opening line, About this letter, How to listen, the photo entries, Answers from the family (when there are answers), What this letter cannot tell you (when it has content), closing line, For the helper: photo files to the last Photo N: line}
+Open questions from the last letter: {numbered list of the questions not yet answered, or none}
+Send all notes in one message, by photo number, for example 3: my brother Sam, just back from a trip. Type remove and photo numbers to leave photos out. Type answers to open questions as A1, A2. Say save when the letter is ready.
+```
+
+   K is the number that qualified in step 3, X the number of photos that are Not described. Since notice: Photos added later but taken before {newest checked time of the previous letter} are not in since letters; ask for a new letter to include them. Capture order notice: The library gave no capture times, so the photos follow library order and the next since letter may repeat photos. Photos left out by check rule 4: Left out, file name not supported: {file names}.
+   - Only the word save starts step 6. A note, a removal or an A answer is never a save: apply it, show the whole preview again, and wait.
+   - N: text becomes the Family says line of photo N, in the words of the helper, with every straight apostrophe written as ’ (check rule 6). remove N drops photos and renumbers 1 to M. A1: text answers open question 1: add the part Answers from the family: before the closing line, with the line From an earlier letter, photo {photo number of that question}: you asked {the question, in the second person}. {Helper, with a capital first letter} says: {text}. That question then leaves the open questions.
+   - A line with a question mark or the word asks is a question, not a note: answer it as in Q2 from the preview entry, with no Q1, and keep any question for the family until after step 8.
+   - Save nothing before save; approval covers only the letter shown.
+
+6. After save: base name = Listening letter - {album name as in file names} - {newest checked time as year-month-day hour-minute, or undated}.
+   delegate --target file-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. If the folder is none, use the personal folder of the user. Return the real path of that folder and the names of its files that start with the name value, or none. Change nothing. Values: folder = {letter folder or none}; name = {base name}.'
+   File name: {base name}.txt if that name is free, else {base name} - 2.txt, then {base name} - 3.txt, the first that is free. Keep the real folder as letter folder.
+
+7. Save.
+   delegate --target knowledge-agent --instruction 'Save the letter text below as one new text file. The text is sent as one line: turn each ¶ sign and the spaces around it into one line break, so ¶ ¶ gives an empty line, and change nothing else; no rewriting, shortening or translating. In the folder and file name only, a ’ may be a straight apostrophe. Never overwrite a file; if the name exists, return failed. Return the real output path, with every straight apostrophe written as ’, the size in bytes and whether the save was verified. Values: folder = {letter folder}; file name = {file name}; letter text = {the last full letter shown in chat, from its opening line to the last Photo N: line, copied unchanged except that every straight apostrophe becomes ’, each line break written as ¶}.'
+   The letter text never holds the Preview line, the notices, the Open questions line or the line about notes. If step 7 fails, show the letter and the reason, and wait for a new save. Never send step 6 or 7 again on your own. Keep: output path, size, verified. The chat save plus the platform approval, when one appears, are the one approval of a letter.
+
+8. Check.
+   delegate --target file-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. In the folder and file name only, a ’ may be a straight apostrophe. Return the first 300 and the last 300 bytes of the file word for word, and its real size in bytes. If that file is not found, use the newest file in that folder whose name starts with the file name without its ending; if none, say no results. Return its real path too. Change nothing. Values: folder = {letter folder}; file name = {file name}.'
+   Saved and checked only if verified, the size is above 0, and the first and last lines match. Step 8 reads the folder and file name you sent in step 7, never a path copied from a result. Questions kept during the preview then go to Q3, with this letter as the latest letter.
+
+## Question mode
+
+Q1. If the entry of photo N is not in this conversation, read it.
+   delegate --target file-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. Use the path value if not none. Otherwise, in the personal folder of the user and its subfolders, find files whose name starts with Listening letter and a dash and whose album part, the text before the last dash, contains the album value, ignoring case and spacing; if several albums match, return at most 3 names and stop. Take the one dated as the letter date, else the latest, then the highest end number. Return its real path, folder and file name, its first line, the line that starts with the word for photo and the number N, such as Photo N of or Foto N de, the lines after it up to the next empty line, and under For the helper: photo files the Language line and the Photo N: line, or no results if missing. Also return the latest letter name of this album and the files in that folder named Listener questions, a dash and that name without its ending, or none. If none matches, say no results. Change nothing. Values: album = {album as in file names}; photo number = {photo number}; letter date = {date the user named or none}; path = {letter path or none}.'
+   Keep: entry lines, language, photo path, letter name, letter folder (the folder of that letter), latest letter, questions files.
+
+Q2. Start the reply with: In the {album name} letter of {date in the letter name, spoken, such as 12 September 2026}, photo {photo number}. Then go through these in order, before any vision call:
+   1. Person question: it asks who someone is, which one, or whether someone is a role or relation (groom, bride, mother, father, grandmother, husband, wife, son, daughter, or the same words in the letter language), or asks about gender, age or feelings. Answer only from the Family says line, or give the last reply. No command. A question that only mentions a name, such as what is Grandma holding, is a visible question: go on to 3.
+   2. When or where: answer only from the When and Where lines, or give the last reply. No command.
+   3. What is visible: if the entry says Not described or has no AI guess line, give the last reply, no command.
+   4. Write {rewritten question}: the question with each name or family word replaced by the position the Family says line gives, such as what is the person on the left wearing for what is Grandpa wearing when Grandpa is on the left. If no position is given, ask the helper for the question without the name. {rewritten question} holds no name or family word.
+   5. Copy the question prompt from [vision prompts](references/vision-prompts.md), with {language} and {rewritten question} replaced, and send:
+   delegate --target photo-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Use the vision-vlm action of the NAS without setting another model value, and send the photo to no other service; if vision-vlm is not available, return failed. Run it once with temperature 0.2, max tokens 80 and this prompt, copied exactly. Prompt begins: {question prompt} Prompt ends. Return the answer word for word, with every straight apostrophe written as ’. Values: path = {real path of photo N}.'
+   Reply with the first line, then one of the four lines below it, at most 2 sentences after the label; the last line for UNCLEAR, no description, or a person question the notes do not answer.
+
+```text
+In the {album name} letter of {date in the letter name, spoken}, photo {photo number}.
+From the family notes: {answer taken from a Family says line}
+From the letter: {answer taken from the When or Where line}
+AI guess, may be wrong: {answer from the vision model}
+The photo cannot tell us that. Shall I keep the question for the family?
+```
+
+Q3. Keep questions for the family. Each kept question is one line: Photo {photo number}, {letter file name}, {question}, asked by {listener}. A yes or keep it is not a save. After yes, send no command; reply only with this and wait:
+
+```text
+Kept for the family:
+{kept lines}
+Say save now to save them, or ask another question.
+```
+
+   Q3 save, only after the user says save now. If Q1 was not sent in this conversation, first send the step 6 lookup with folder = {letter folder} and name = Listener questions - {latest letter file name without its ending}. File name: Listener questions - {latest letter file name without its ending} - {first unused number from 1}.txt.
+   delegate --target knowledge-agent --instruction 'Save the text below as one new text file. The text is sent as one line: turn each ¶ sign and the spaces around it into one line break, and change nothing else. In the folder and file name only, a ’ may be a straight apostrophe. Never overwrite a file; if the name exists, return failed. Return the real output path, with every straight apostrophe written as ’, the size in bytes and whether the save was verified. Values: folder = {letter folder}; file name = {questions file name}; text = {kept questions, each line break written as ¶}.'
+   The only other approval. The next since letter lists them as open questions.
+
+## Recovery rules
+Notes, removals or answers: step 5, no new vision calls. Detail changed: step 4. Album: step 1. Line 6: step 2, or step 3 with start time none. Limit: step 3. A failed read-only step may be sent again once, with the reason shown. A failed or cancelled save is never repeated without a new save and approval from the helper.
+
+# Completion and failure
+- completed: use only returned data; an empty list means no results.
+- failed: report the step and the reason, keep partial results, stop dependent steps. If step 6 or 7 fails, show the approved letter in chat.
+- cancelled: the choice of the user; stop and list what was done. If step 7 is cancelled or denied, reply with the line Nothing was saved. Here is the letter again; say save to try again. and then the whole letter, from the opening line to the last Photo N: line.
+- waiting_user: pass the expert question on unchanged, wait, resume the same step.
+- waiting_approval: show the request unchanged and wait; nothing is saved yet.
+- Never claim a saved letter before step 7 is completed with a real output path.
+
+Final report after step 8, nothing after it except Q3 for questions kept during the preview:
+
+```text
+Saved and checked: {output path}, {size} bytes, {M} photos, {X} not described.
+Next time say: Album Out Loud, photos since the last letter for {listener}, album {album name}.
+```
+
+Step 8 difference: Saved with a difference: {output path}. The saved file does not match the letter: {difference}. Step 8 failed: Saved, not checked: {output path}. The read-back failed: {reason}.
+
+Test recipe: [quick test](references/quick-test.md). Disclosure: [disclosure](references/disclosure.md).

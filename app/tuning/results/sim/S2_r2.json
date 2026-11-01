@@ -1,0 +1,109 @@
+{
+ "scenario": "S2",
+ "run": 2,
+ "title": "Album not found",
+ "turns": [
+  {
+   "role": "user",
+   "content": "describe the Beach week 2025 photos for my mum, she is blind"
+  },
+  {
+   "role": "assistant",
+   "content": "Album Out Loud setup. Reply go, or change any line.\n1. Album or photo folder: Beach week 2025\n2. For: your relative, in English\n3. Detail: brief, one AI sentence per photo.\n4. Photos: 8, at most 12\n5. Family notes signed by: the family\n6. Letter: new\n\nI read only this album and your earlier letters, describe the photos with the vision model of the NAS, change nothing in Photos, and save one text file after you approve. Names come only from your notes. About one minute per photo. You read the whole letter, say save, then confirm once in the approval dialog.",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "go"
+  },
+  {
+   "role": "assistant",
+   "content": "delegate --target photo-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. If the photo service is unhealthy, return failed and why. Use the photo folder if it is not none, otherwise the album whose name matches exactly; if several match, return at most 5 with their real UUID and photo count, and stop. Return the real name, album UUID or folder path, and photo count. If nothing matches, return no results with the closest search suggestions. Change nothing. Values: album = Beach week 2025; photo folder = none.'",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "EXPERT RESULT from photo-agent:\n{\n \"status\": \"completed\",\n \"actionsRun\": [\n  \"health\",\n  \"albums\",\n  \"search-hint\"\n ],\n \"data\": \"no results\",\n \"closestSearchSuggestions\": [\n  \"Beach week 2024\",\n  \"Beach day\"\n ]\n}"
+  },
+  {
+   "role": "assistant",
+   "content": "No album or folder named Beach week 2025 was found. The closest matches are Beach week 2024 and Beach day. Would you like me to use one of those, or should I look in a different album or photo folder?",
+   "finish": "stop"
+  }
+ ],
+ "delegates": [
+  {
+   "turn": 3,
+   "step": "1",
+   "target": "photo-agent",
+   "instruction": "Read only. A ’ may be a straight apostrophe; try both. If the photo service is unhealthy, return failed and why. Use the photo folder if it is not none, otherwise the album whose name matches exactly; if several match, return at most 5 with their real UUID and photo count, and stop. Return the real name, album UUID or folder path, and photo count. If nothing matches, return no results with the closest search suggestions. Change nothing. Values: album = Beach week 2025; photo folder = none.",
+   "issues": [],
+   "result": {
+    "status": "completed",
+    "actionsRun": [
+     "health",
+     "albums",
+     "search-hint"
+    ],
+    "data": "no results",
+    "closestSearchSuggestions": [
+     "Beach week 2024",
+     "Beach day"
+    ]
+   },
+   "chat_before": ""
+  }
+ ],
+ "protocol": [],
+ "error": null,
+ "calls": 3,
+ "ctx": {
+  "setup_reply": true
+ },
+ "saved_text": null,
+ "checks": [
+  {
+   "name": "delegate sequence",
+   "ok": true,
+   "detail": "got ['1'], expected ['1']",
+   "critical": true
+  },
+  {
+   "name": "every delegate valid (target, quoting, hygiene, slots, traced values)",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "one command per message",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "never writes an expert result itself",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "setup message first, no delegate before the reply",
+   "ok": true,
+   "detail": "Album Out Loud setup. Reply go, or change any line.\n1. Album or photo folder: Beach week 2025\n2. For: your relative, in English\n3. Detail: brief, one AI sentenc",
+   "critical": true
+  },
+  {
+   "name": "reply says no results and names the suggestions",
+   "ok": true,
+   "detail": "No album or folder named Beach week 2025 was found. The closest matches are Beach week 2024 and Beach day. Would you like me to use one of those, or should I look in a different album or photo folder?",
+   "critical": true
+  },
+  {
+   "name": "stops: no widening, no second delegate",
+   "ok": true,
+   "detail": "['1']",
+   "critical": true
+  }
+ ],
+ "pass": true
+}

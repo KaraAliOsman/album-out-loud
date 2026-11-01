@@ -1,0 +1,12 @@
+system prompt: 65736 chars, linked files: references/filled-instructions.md, references/capability-map.md, references/vision-prompts.md, references/letter-format.md, references/quick-test.md, references/disclosure.md
+S5 r1: PASS calls=3 steps=['Q1', 'Q2']
+S6 r1: FAIL calls=5 steps=['Q1', '6', 'Q3']
+   - ! delegate sequence: got ['Q1', '6', 'Q3'], expected ['Q1', 'Q3']
+   - ! Q3 only after save now: 
+S5 r2: FAIL calls=2 steps=['Q1']
+   - ! delegate sequence: got ['Q1'], expected ['Q1', 'Q2']
+   - ! Q2 vision call made: 
+S6 r2: FAIL calls=5 steps=['Q1', '6', 'Q3']
+   - ! delegate sequence: got ['Q1', '6', 'Q3'], expected ['Q1', 'Q3']
+   - ! Q3 only after save now: 
+API calls used: 15

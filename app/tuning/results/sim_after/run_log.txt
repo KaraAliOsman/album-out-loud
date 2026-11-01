@@ -1,0 +1,23 @@
+system prompt: 62861 chars, linked files: references/filled-instructions.md, references/capability-map.md, references/vision-prompts.md, references/letter-format.md, references/quick-test.md, references/disclosure.md
+S1 r1: FAIL calls=11 steps=['1', '3', '4', '4', '6', '7', '8']
+   - ! every delegate valid (target, quoting, hygiene, slots, traced values): step 8: 1 straight apostrophe(s) inside the instruction
+   - ! preview shown with counts: Preview: 8 of 8 photos chosen, 1 not described (P5). Nothing is saved yet.
+
+Grandpa, here are 8 photos from Grandpa’s 80
+   - ! first preview: anchor For the helper: photo files: 
+   - ! first preview: anchor Selection rule: 1: 
+   - ! first preview: anchor Newest photo checked: 2026-09-12 18:40:12: 
+   - ! first preview: Photo 1: real path line: /volume1/Photos/2026/Grandpa's 80th birthday/IMG_4101.jpg
+   - ! first preview: photo files section is last: Words in the photo, AI reading: STATE PARK BOUNDARY PRIVATE PROPERTY PAST THIS P
+   - ! saved text matches the last preview shown: similarity 0.775
+S4 r1: FAIL calls=9 steps=['1', '2', '3', '4', '6', '7', '8']
+   - ! every delegate valid (target, quoting, hygiene, slots, traced values): step 8: 1 straight apostrophe(s) inside the instruction
+   - ! setup message first, no delegate before the reply: delegate --target photo-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and
+   - ! steps 6 and 7 only after the user said save: 
+S5 r1: PASS calls=3 steps=['Q1', 'Q2']
+S6 r1: FAIL calls=4 steps=['Q1', 'Q3']
+   - ! Q3 only after save now: 
+S8 r1: PASS calls=5 steps=['1', '3', '4']
+   - ~ Spanish preview: photo 3 OCR words not marked AI reading: he afternoon. Where: Valparaíso. AI guess: Una señal azul indica la Calle Escoriaza junto a un poste y un árbol. Words in the photo, AI reading: CALLE ESCORIAZA
+   - ~ Spanish preview: entries in Spanish: 
+API calls used: 32

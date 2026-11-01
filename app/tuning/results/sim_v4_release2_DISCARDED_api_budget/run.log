@@ -1,0 +1,12 @@
+system prompt: 65987 chars, linked files: references/filled-instructions.md, references/capability-map.md, references/vision-prompts.md, references/letter-format.md, references/quick-test.md, references/disclosure.md
+S1 r1: FAIL calls=9 steps=['1', '3', '4', '4', '6']
+   - ! API calls completed: HTTP 422: {"error":{"message":"Budget has been exceeded! User=2109ad04-f5a4-48b6-a69a-98918fd8c757 Current cost: 15.01151025, Max budget: 15.0","type":"budget_exceeded","param":null,"code":"422"}}; HTTP 422: {"error":{"message":"ExceededBudget: User=2109ad04-f5a4-48b6-a69a-98918fd8c757 over budget. 
+   - ! delegate sequence: got ['1', '3', '4', '4', '6'], expected ['1', '3', '4', '4', '6', '7', '8']
+Traceback (most recent call last):
+  File "<repo>\app\tuning\simulate.py", line 1011, in <module>
+    main()
+    ~~~~^^
+  File "<repo>\app\tuning\simulate.py", line 1005, in main
+    print(f"   - {'!' if x['critical'] else '~'} {x['name']}: {x['detail'][:300]}")
+                                                               ~~~~~~~~~~~^^^^^^
+TypeError: 'NoneType' object is not subscriptable

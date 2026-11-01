@@ -1,0 +1,10 @@
+system prompt: 65840 chars, linked files: references/filled-instructions.md, references/capability-map.md, references/vision-prompts.md, references/letter-format.md, references/quick-test.md, references/disclosure.md
+S5 r1: PASS calls=3 steps=['Q1', 'Q2']
+S6 r1: PASS calls=5 steps=['Q1', 'Q3']
+S5 r2: PASS calls=3 steps=['Q1', 'Q2']
+S6 r2: PASS calls=5 steps=['Q1', 'Q3']
+S5 r3: PASS calls=3 steps=['Q1', 'Q2']
+S6 r3: PASS calls=5 steps=['Q1', 'Q3']
+S5 r4: PASS calls=3 steps=['Q1', 'Q2']
+S6 r4: PASS calls=5 steps=['Q1', 'Q3']
+API calls used: 32

@@ -1,0 +1,6 @@
+system prompt: 65695 chars, linked files: references/filled-instructions.md, references/capability-map.md, references/vision-prompts.md, references/letter-format.md, references/quick-test.md, references/disclosure.md
+S1 r1: PASS calls=11 steps=['1', '3', '4', '4', '6', '7', '8']
+S1 r2: PASS calls=11 steps=['1', '3', '4', '4', '6', '7', '8']
+S1 r3: PASS calls=11 steps=['1', '3', '4', '4', '6', '7', '8']
+   - ~ saved letter: photo 6 OCR words not marked AI reading: a del Mar. AI guess: A welcome sign for the city of Haskell stands in a grassy field with bushes. Words in the photo, AI reading: Welcome to the CITY OF HASKELL
+API calls used: 33

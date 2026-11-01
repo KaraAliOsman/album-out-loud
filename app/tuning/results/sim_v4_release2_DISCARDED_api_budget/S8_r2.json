@@ -1,0 +1,331 @@
+{
+ "scenario": "S8",
+ "run": 2,
+ "title": "Spanish listener, stop at preview",
+ "turns": [
+  {
+   "role": "user",
+   "content": "Album Out Loud, hazme una carta para escuchar del álbum Cumpleaños de la abuela, para mi abuela que ya no ve bien. 4 fotos."
+  },
+  {
+   "role": "assistant",
+   "content": "Album Out Loud setup. Reply go, or change any line.\n1. Album or photo folder: Cumpleaños de la abuela\n2. For: tu abuela, in Spanish\n3. Detail: brief, one AI sentence per photo. Say rich for up to three sentences per photo.\n4. Photos: 4\n5. Family notes signed by: the family\n6. Letter: new\n\nI read only this album and your earlier letters, ask the photo expert of the NAS to describe the photos, change nothing in Photos, and save one text file after you approve. Names come only from your notes. The time per photo depends on the NAS model and has not been measured yet. You read the whole letter, say save, then confirm once more if Uliya asks.",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "dale, adelante"
+  },
+  {
+   "role": "assistant",
+   "content": "delegate --target photo-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. If the photo service is unhealthy, return failed and why. Use the photo folder if it is not none, otherwise the album whose name matches exactly. Use only a regular, folder, condition or custom album, never a face, baby, pet, object, location or city album; if only such an album matches, return no results. If several match, return at most 5 with their real UUID and photo count, and stop. Return the real name, album UUID or folder path, and photo count. If nothing matches, return no results with the closest search suggestions. Change nothing. Values: album = Cumpleaños de la abuela; photo folder = none.'",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "EXPERT RESULT from photo-agent:\n{\n \"status\": \"completed\",\n \"actionsRun\": [\n  \"health\",\n  \"albums\"\n ],\n \"data\": {\n  \"name\": \"Cumpleaños de la abuela\",\n  \"albumUuid\": \"9d2e4c61-0b7f-4e3a-a1c5-6f8b0d2e7a19\",\n  \"photoCount\": 6\n }\n}"
+  },
+  {
+   "role": "assistant",
+   "content": "delegate --target photo-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. List still photos only, without videos and the screenshot category, paging through as many items as the photo count, sorted by capture time, oldest first. If the start time is not none, keep only photos taken after it, and leave out the already listed paths. If more remain than the limit, apply selection rule 1: keep the oldest and the newest, spread the rest evenly by position, and if a pick shares its minute with the pick before it, take the next photo in a later minute while one remains. Read their metadata in one call. Return the number of photos that qualified before the limit, the number kept, the newest capture time kept as year-month-day hour:minute:second, and per chosen photo, oldest first, P number, capture date and time, camera or file as its time source, the city, area or venue name or none, and the real file path. No street, house number or coordinates. Without capture times, say capture order unknown and newest time unknown. If no still photo remains, say no results. Change nothing. Values: album = Cumpleaños de la abuela; album UUID or photo folder = 9d2e4c61-0b7f-4e3a-a1c5-6f8b0d2e7a19; photo count = 6; limit = 4; start time = none; already listed = none.'",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "EXPERT RESULT from photo-agent:\n{\n \"status\": \"completed\",\n \"actionsRun\": [\n  \"search-picture (file type image, all pages)\",\n  \"search-screen (screenshot)\",\n  \"meta\"\n ],\n \"data\": {\n  \"qualified\": 4,\n  \"kept\": 4,\n  \"newestCaptureTimeKept\": \"2026-07-20 14:48:02\",\n  \"photos\": [\n   {\n    \"P\": 1,\n    \"captureTime\": \"2026-07-20 13:10:05\",\n    \"timeSource\": \"camera\",\n    \"place\": \"Valparaíso\",\n    \"path\": \"/volume1/Photos/2026/Cumpleaños de la abuela/IMG_0901.jpg\"\n   },\n   {\n    \"P\": 2,\n    \"captureTime\": \"2026-07-20 13:42:51\",\n    \"timeSource\": \"camera\",\n    \"place\": \"Valparaíso\",\n    \"path\": \"/volume1/Photos/2026/Cumpleaños de la abuela/IMG_0904.jpg\"\n   },\n   {\n    \"P\": 3,\n    \"captureTime\": \"2026-07-20 14:15:30\",\n    \"timeSource\": \"camera\",\n    \"place\": \"Valparaíso\",\n    \"path\": \"/volume1/Photos/2026/Cumpleaños de la abuela/IMG_0909.jpg\"\n   },\n   {\n    \"P\": 4,\n    \"captureTime\": \"2026-07-20 14:48:02\",\n    \"timeSource\": \"camera\",\n    \"place\": null,\n    \"path\": \"/volume1/Photos/2026/Cumpleaños de la abuela/IMG_0913.jpg\"\n   }\n  ]\n }\n}"
+  },
+  {
+   "role": "assistant",
+   "content": "delegate --target photo-agent --instruction 'Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines, and in answer lines, as ’. Use the vision-vlm action of the NAS without setting another model value, and send no photo to another service; if vision-vlm is not available, return failed. For each photo, run vision-vlm once with temperature 0.2, max tokens 90 and this prompt, copied exactly. Prompt begins: You write the spoken description of one family photo for a listener who is blind. Step 1, privacy: if the photo shows an ID card, a bank card, a medical paper, a medical scene, an injury, a bare body, a baby or child who is not fully dressed, such as in a bath, or a phone or computer screen with messages or personal data, write only Not described: and a reason of at most 4 words in Spanish, and nothing else. Step 2, otherwise write exactly two lines and nothing more. Line 1: one sentence in Spanish of 8 to 12 words that starts with the main subject and says what is happening. Line 2: Words: and then the large, clear text that is a main part of the photo, such as a sign, a banner, writing on a cake or a printed shirt, copied letter by letter in its own language and spelling, at most 25 words, or Words: none. Leave out small print, bottle and food labels, logos, watermarks, number plates and any number longer than 4 digits, and never translate. For people, give the number up to 5, otherwise say a group, call each one a baby, a child or an adult, never man, woman, boy, girl, he or she, and give their main visible action. In a language with gendered words, use the same form for every adult whatever they look like, such as un adulto in Spanish. Never mention a name, ethnicity, skin, body, looks, age in years, health, disability or religion, and never guess who someone is, how they are related, such as a family or a couple, or what they feel. If the figures are statues, toys, drawings or pictures, say so first, such as a bronze statue of two children. Name an event only when clear objects show it, such as candles on a cake or graduation gowns. If the photo is black and white or an old print, begin Line 1 with the words In black and white or An old print, said in Spanish, never with this photo shows. If the whole photo is too dark or too blurred to see, Line 1 says only that, in Spanish, Line 2 is Words: none, and you guess nothing. Never begin with this photo shows, the image or a picture of. Keep the labels Line 1, Line 2, Words, none and Not described in English. Use no quotation marks, no apostrophes and, in English, no contractions. Prompt ends. If the answer has a Words line, with or without a Line 2 or Line 3 label, that is not Words: none, also run vision-ocr on that photo. Return one record per photo in order: P number, every answer line word for word, and the vision-ocr result or none. If vision-vlm fails on a photo, return its P number, Not described and why. Never describe a photo yourself. Values: photos = P1 /volume1/Photos/2026/Cumpleaños de la abuela/IMG_0901.jpg; P2 /volume1/Photos/2026/Cumpleaños de la abuela/IMG_0904.jpg; P3 /volume1/Photos/2026/Cumpleaños de la abuela/IMG_0909.jpg; P4 /volume1/Photos/2026/Cumpleaños de la abuela/IMG_0913.jpg.'",
+   "finish": "stop"
+  },
+  {
+   "role": "user",
+   "content": "EXPERT RESULT from photo-agent:\n{\n \"status\": \"completed\",\n \"actionsRun\": [\n  \"vision-vlm\",\n  \"vision-ocr\"\n ],\n \"data\": {\n  \"records\": [\n   {\n    \"P\": 1,\n    \"answer\": \"Line 1: En blanco y negro, una adulta sostiene a un bebé en sus brazos.\\nLine 2: Words: none\",\n    \"visionOcr\": \"none\"\n   },\n   {\n    \"P\": 2,\n    \"answer\": \"Line 1: Un trozo de pastel de chocolate con una decoración blanca sobre un plato blanco con borde amarillo.\\nLine 2: Words: Happy Birthday\",\n    \"visionOcr\": \"Happy Birthday\"\n   },\n   {\n    \"P\": 3,\n    \"answer\": \"Line 1: Una señal azul indica la Calle Escoriaza junto a un poste y un árbol.\\nLine 2: Words: CALLE ESCORIAZA\",\n    \"visionOcr\": \"CALLE ESCORIAZA\"\n   },\n   {\n    \"P\": 4,\n    \"answer\": \"Not described: documento de identidad personal\",\n    \"visionOcr\": \"none\"\n   }\n  ]\n }\n}"
+  },
+  {
+   "role": "assistant",
+   "content": "Preview: 4 photos qualified, 4 chosen, 1 not described (P4). Nothing is saved yet.\n\nDad, here are 4 photos from Cumpleaños de la abuela, chosen by the family.\nAbout this letter: Taken on 20 July 2026, from 1:10 to 2:48 in the afternoon.\nHow to listen: Cada foto empieza con su número, como Foto 1 de 4. Las líneas que empiezan con Family says son de the family, y los nombres vienen solo de ellos. Las líneas que empiezan con AI guess las escribió una computadora y pueden estar equivocadas.\n\nFoto 1 de 4.\nWhen: 20 de julio de 2026, 1:10 de la tarde.\nWhere: Valparaíso.\nAI guess: En blanco y negro, una adulta sostiene a un bebé en sus brazos.\n\nFoto 2 de 4.\nWhen: 20 de julio de 2026, 1:42 de la tarde.\nWhere: Valparaíso.\nAI guess: Un trozo de pastel de chocolate con una decoración blanca sobre un plato blanco con borde amarillo.\nWords in the photo: Happy Birthday\n\nFoto 3 de 4.\nWhen: 20 de julio de 2026, 2:15 de la tarde.\nWhere: Valparaíso.\nAI guess: Una señal azul indica la Calle Escoriaza junto a un poste y un árbol.\nWords in the photo: CALLE ESCORIAZA\n\nFoto 4 de 4.\nWhen: 20 de julio de 2026, 2:48 de la tarde.\nThis photo was not described. Reason: documento de identidad personal.\n\nFrom the family. The rest of this letter is a file list for the helper; you can stop listening here.\n\nFor the helper: photo files\nKeep this part for the next letter. It holds folder names, so remove it from any copy shared outside the family.\nLanguage: Spanish\nSelection rule: 1\nNewest photo checked: 2026-07-20 14:48:02\nPhoto 1: /volume1/Photos/2026/Cumpleaños de la abuela/IMG_0901.jpg\nPhoto 2: /volume1/Photos/2026/Cumpleaños de la abuela/IMG_0904.jpg\nPhoto 3: /volume1/Photos/2026/Cumpleaños de la abuela/IMG_0909.jpg\nPhoto 4: /volume1/Photos/2026/Cumpleaños de la abuela/IMG_0913.jpg\n\nOpen questions from the last letter: none\n\nSend all notes in one message, by photo number, for example 3: my brother Sam, just back from a trip. Type remove and photo numbers to leave photos out. Type answers to open questions as A1, A2. Say save when the letter is ready.",
+   "finish": "stop"
+  }
+ ],
+ "delegates": [
+  {
+   "turn": 3,
+   "step": "1",
+   "target": "photo-agent",
+   "instruction": "Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. If the photo service is unhealthy, return failed and why. Use the photo folder if it is not none, otherwise the album whose name matches exactly. Use only a regular, folder, condition or custom album, never a face, baby, pet, object, location or city album; if only such an album matches, return no results. If several match, return at most 5 with their real UUID and photo count, and stop. Return the real name, album UUID or folder path, and photo count. If nothing matches, return no results with the closest search suggestions. Change nothing. Values: album = Cumpleaños de la abuela; photo folder = none.",
+   "issues": [],
+   "result": {
+    "status": "completed",
+    "actionsRun": [
+     "health",
+     "albums"
+    ],
+    "data": {
+     "name": "Cumpleaños de la abuela",
+     "albumUuid": "9d2e4c61-0b7f-4e3a-a1c5-6f8b0d2e7a19",
+     "photoCount": 6
+    }
+   },
+   "chat_before": ""
+  },
+  {
+   "turn": 5,
+   "step": "3",
+   "target": "photo-agent",
+   "instruction": "Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines as ’. List still photos only, without videos and the screenshot category, paging through as many items as the photo count, sorted by capture time, oldest first. If the start time is not none, keep only photos taken after it, and leave out the already listed paths. If more remain than the limit, apply selection rule 1: keep the oldest and the newest, spread the rest evenly by position, and if a pick shares its minute with the pick before it, take the next photo in a later minute while one remains. Read their metadata in one call. Return the number of photos that qualified before the limit, the number kept, the newest capture time kept as year-month-day hour:minute:second, and per chosen photo, oldest first, P number, capture date and time, camera or file as its time source, the city, area or venue name or none, and the real file path. No street, house number or coordinates. Without capture times, say capture order unknown and newest time unknown. If no still photo remains, say no results. Change nothing. Values: album = Cumpleaños de la abuela; album UUID or photo folder = 9d2e4c61-0b7f-4e3a-a1c5-6f8b0d2e7a19; photo count = 6; limit = 4; start time = none; already listed = none.",
+   "issues": [],
+   "result": {
+    "status": "completed",
+    "actionsRun": [
+     "search-picture (file type image, all pages)",
+     "search-screen (screenshot)",
+     "meta"
+    ],
+    "data": {
+     "qualified": 4,
+     "kept": 4,
+     "newestCaptureTimeKept": "2026-07-20 14:48:02",
+     "photos": [
+      {
+       "P": 1,
+       "captureTime": "2026-07-20 13:10:05",
+       "timeSource": "camera",
+       "place": "Valparaíso",
+       "path": "/volume1/Photos/2026/Cumpleaños de la abuela/IMG_0901.jpg"
+      },
+      {
+       "P": 2,
+       "captureTime": "2026-07-20 13:42:51",
+       "timeSource": "camera",
+       "place": "Valparaíso",
+       "path": "/volume1/Photos/2026/Cumpleaños de la abuela/IMG_0904.jpg"
+      },
+      {
+       "P": 3,
+       "captureTime": "2026-07-20 14:15:30",
+       "timeSource": "camera",
+       "place": "Valparaíso",
+       "path": "/volume1/Photos/2026/Cumpleaños de la abuela/IMG_0909.jpg"
+      },
+      {
+       "P": 4,
+       "captureTime": "2026-07-20 14:48:02",
+       "timeSource": "camera",
+       "place": null,
+       "path": "/volume1/Photos/2026/Cumpleaños de la abuela/IMG_0913.jpg"
+      }
+     ]
+    }
+   },
+   "chat_before": ""
+  },
+  {
+   "turn": 7,
+   "step": "4",
+   "target": "photo-agent",
+   "instruction": "Read only. A ’ may be a straight apostrophe; try both. Write every straight apostrophe in returned names, paths and lines, and in answer lines, as ’. Use the vision-vlm action of the NAS without setting another model value, and send no photo to another service; if vision-vlm is not available, return failed. For each photo, run vision-vlm once with temperature 0.2, max tokens 90 and this prompt, copied exactly. Prompt begins: You write the spoken description of one family photo for a listener who is blind. Step 1, privacy: if the photo shows an ID card, a bank card, a medical paper, a medical scene, an injury, a bare body, a baby or child who is not fully dressed, such as in a bath, or a phone or computer screen with messages or personal data, write only Not described: and a reason of at most 4 words in Spanish, and nothing else. Step 2, otherwise write exactly two lines and nothing more. Line 1: one sentence in Spanish of 8 to 12 words that starts with the main subject and says what is happening. Line 2: Words: and then the large, clear text that is a main part of the photo, such as a sign, a banner, writing on a cake or a printed shirt, copied letter by letter in its own language and spelling, at most 25 words, or Words: none. Leave out small print, bottle and food labels, logos, watermarks, number plates and any number longer than 4 digits, and never translate. For people, give the number up to 5, otherwise say a group, call each one a baby, a child or an adult, never man, woman, boy, girl, he or she, and give their main visible action. In a language with gendered words, use the same form for every adult whatever they look like, such as un adulto in Spanish. Never mention a name, ethnicity, skin, body, looks, age in years, health, disability or religion, and never guess who someone is, how they are related, such as a family or a couple, or what they feel. If the figures are statues, toys, drawings or pictures, say so first, such as a bronze statue of two children. Name an event only when clear objects show it, such as candles on a cake or graduation gowns. If the photo is black and white or an old print, begin Line 1 with the words In black and white or An old print, said in Spanish, never with this photo shows. If the whole photo is too dark or too blurred to see, Line 1 says only that, in Spanish, Line 2 is Words: none, and you guess nothing. Never begin with this photo shows, the image or a picture of. Keep the labels Line 1, Line 2, Words, none and Not described in English. Use no quotation marks, no apostrophes and, in English, no contractions. Prompt ends. If the answer has a Words line, with or without a Line 2 or Line 3 label, that is not Words: none, also run vision-ocr on that photo. Return one record per photo in order: P number, every answer line word for word, and the vision-ocr result or none. If vision-vlm fails on a photo, return its P number, Not described and why. Never describe a photo yourself. Values: photos = P1 /volume1/Photos/2026/Cumpleaños de la abuela/IMG_0901.jpg; P2 /volume1/Photos/2026/Cumpleaños de la abuela/IMG_0904.jpg; P3 /volume1/Photos/2026/Cumpleaños de la abuela/IMG_0909.jpg; P4 /volume1/Photos/2026/Cumpleaños de la abuela/IMG_0913.jpg.",
+   "issues": [],
+   "result": {
+    "status": "completed",
+    "actionsRun": [
+     "vision-vlm",
+     "vision-ocr"
+    ],
+    "data": {
+     "records": [
+      {
+       "P": 1,
+       "answer": "Line 1: En blanco y negro, una adulta sostiene a un bebé en sus brazos.\nLine 2: Words: none",
+       "visionOcr": "none"
+      },
+      {
+       "P": 2,
+       "answer": "Line 1: Un trozo de pastel de chocolate con una decoración blanca sobre un plato blanco con borde amarillo.\nLine 2: Words: Happy Birthday",
+       "visionOcr": "Happy Birthday"
+      },
+      {
+       "P": 3,
+       "answer": "Line 1: Una señal azul indica la Calle Escoriaza junto a un poste y un árbol.\nLine 2: Words: CALLE ESCORIAZA",
+       "visionOcr": "CALLE ESCORIAZA"
+      },
+      {
+       "P": 4,
+       "answer": "Not described: documento de identidad personal",
+       "visionOcr": "none"
+      }
+     ]
+    }
+   },
+   "chat_before": ""
+  }
+ ],
+ "protocol": [],
+ "error": null,
+ "calls": 5,
+ "replayed_turns": 0,
+ "ctx": {
+  "setup_reply": true
+ },
+ "saved_text": null,
+ "checks": [
+  {
+   "name": "delegate sequence",
+   "ok": true,
+   "detail": "got ['1', '3', '4'], expected ['1', '3', '4']",
+   "critical": true
+  },
+  {
+   "name": "every delegate valid (target, quoting, hygiene, slots, traced values)",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "one command per message",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "never writes an expert result itself",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "setup message first, no delegate before the reply",
+   "ok": true,
+   "detail": "Album Out Loud setup. Reply go, or change any line.\n1. Album or photo folder: Cumpleaños de la abuela\n2. For: tu abuela, in Spanish\n3. Detail: brief, one AI sen",
+   "critical": true
+  },
+  {
+   "name": "brief prompt copied exactly (call 1)",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "brief max tokens 90 (call 1)",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "step 1 album value",
+   "ok": true,
+   "detail": "Cumpleaños de la abuela",
+   "critical": true
+  },
+  {
+   "name": "Spanish preview: opening line names the album",
+   "ok": true,
+   "detail": "Dad, here are 4 photos from Cumpleaños de la abuela, chosen by the family.",
+   "critical": true
+  },
+  {
+   "name": "Spanish preview: 4 numbered entries",
+   "ok": true,
+   "detail": "found [1, 2, 3, 4]",
+   "critical": true
+  },
+  {
+   "name": "Spanish preview: AI guess lines hold no name or gender word",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "Spanish preview: lines with no content left out (no ': none')",
+   "ok": true,
+   "detail": "",
+   "critical": false
+  },
+  {
+   "name": "Spanish preview: no weekday",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "Spanish preview: plain text, no markup",
+   "ok": true,
+   "detail": "",
+   "critical": false
+  },
+  {
+   "name": "Spanish preview: anchor For the helper: photo files",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "Spanish preview: anchor Selection rule: 1",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "Spanish preview: anchor Newest photo checked: 2026-07-20 14:48:02",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "Spanish preview: Photo N: real path lines",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "Spanish preview: photo files section is last",
+   "ok": true,
+   "detail": "Photo 4: /volume1/Photos/2026/Cumpleaños de la abuela/IMG_0913.jpg",
+   "critical": true
+  },
+  {
+   "name": "Spanish preview: photo 4 Not described with reason",
+   "ok": true,
+   "detail": "When: 20 de julio de 2026, 2:48 de la tarde. This photo was not described. Reason: documento de identidad personal.",
+   "critical": true
+  },
+  {
+   "name": "Spanish preview: photo 4 has no AI guess",
+   "ok": true,
+   "detail": "When: 20 de julio de 2026, 2:48 de la tarde. This photo was not described. Reason: documento de identidad personal.",
+   "critical": true
+  },
+  {
+   "name": "Spanish preview: photo 2 Words in the photo from OCR",
+   "ok": true,
+   "detail": "re: Valparaíso. AI guess: Un trozo de pastel de chocolate con una decoración blanca sobre un plato blanco con borde amarillo. Words in the photo: Happy Birthday",
+   "critical": true
+  },
+  {
+   "name": "Spanish preview: photo 2 OCR words not marked AI reading",
+   "ok": true,
+   "detail": "re: Valparaíso. AI guess: Un trozo de pastel de chocolate con una decoración blanca sobre un plato blanco con borde amarillo. Words in the photo: Happy Birthday",
+   "critical": false
+  },
+  {
+   "name": "Spanish preview: photo 3 Words in the photo from OCR",
+   "ok": true,
+   "detail": "e 2026, 2:15 de la tarde. Where: Valparaíso. AI guess: Una señal azul indica la Calle Escoriaza junto a un poste y un árbol. Words in the photo: CALLE ESCORIAZA",
+   "critical": true
+  },
+  {
+   "name": "Spanish preview: photo 3 OCR words not marked AI reading",
+   "ok": true,
+   "detail": "e 2026, 2:15 de la tarde. Where: Valparaíso. AI guess: Una señal azul indica la Calle Escoriaza junto a un poste y un árbol. Words in the photo: CALLE ESCORIAZA",
+   "critical": false
+  },
+  {
+   "name": "Spanish preview: entries in Spanish",
+   "ok": true,
+   "detail": "",
+   "critical": false
+  }
+ ],
+ "pass": true
+}

@@ -1,0 +1,995 @@
+"""Dry-run harness for the Album Out Loud Skill.
+
+A cloud model (Nemotron, thinking off, temperature 0.2) plays the Uliya parent agent. Its system
+prompt is the full SKILL.md plus every reference file that SKILL.md links. The harness plays the
+user and the experts: each delegate the model emits is parsed, validated and answered with a
+mocked expert result authored here (album lists, search-picture items with paths and times,
+meta, vision outputs taken from the tuning set, save-text outputFile, contentBytes and
+verified=true, waiting_approval, no results, failed).
+
+Nothing here runs on a NAS. The mocks only reflect the catalog return fields; the real experts
+may answer differently.
+
+Usage:
+  python -I simulate.py [--runs 2] [--start-run 1] [--only S1,S4] [--budget 120]
+  python -I simulate.py --replay results/sim/X.json --upto N --as-run R --budget B
+      feeds the first N recorded assistant turns back (no API calls), re-runs the mocks and the
+      simulated user on them, then continues live
+  python -I simulate.py --reeval     recompute all checks on saved runs, no API calls
+Writes results/sim/<scenario>_r<n>.json and results/sim/summary.json.
+The API key is read at call time by common.chat and is never printed or stored.
+"""
+import argparse
+import difflib
+import json
+import re
+import sys
+import threading
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+sys.stdout.reconfigure(encoding="utf-8")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from common import MODELS, THINKING_OFF, chat_retry, extract  # noqa: E402
+
+ROOT = Path(__file__).resolve().parent
+SKILL_DIR = ROOT.parent / "album-out-loud"
+OUT = ROOT / "results" / "sim"
+MODEL = MODELS["nemotron"]
+TEMPERATURE = 0.2
+MAX_TOKENS = 4096
+
+AGENTS = {"photo-agent", "file-agent", "knowledge-agent", "document-agent", "media-agent",
+          "security-monitor-agent"}
+APO = "’"
+
+# --------------------------------------------------------------------------- system prompt
+
+PREAMBLE = """You are Uliya, the main agent on a UGREEN NAS. The Skill below is loaded for this conversation; follow it.
+Registered experts: photo-agent, file-agent, knowledge-agent, document-agent, media-agent, security-monitor-agent.
+To call an expert, write one delegate command in the form the Skill uses as the last part of your message, with nothing after it, and do not put it in a code block. The next message then starts with EXPERT RESULT and holds what the expert returned. Every other message comes from the user. Approval dialogs are shown to the user by the platform. Never write an expert result yourself.
+The files that SKILL.md links are included after it, so you do not need to read them.
+"""
+
+
+def build_system_prompt():
+    skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
+    links = re.findall(r"\]\((references/[^)]+\.md)\)", skill)
+    seen = []
+    for link in links:
+        if link not in seen:
+            seen.append(link)
+    parts = [PREAMBLE, "===== SKILL.md =====", skill]
+    for link in seen:
+        parts += [f"===== {link} =====", (SKILL_DIR / link).read_text(encoding="utf-8")]
+    return "\n\n".join(parts), seen
+
+
+def load_vision_prompts():
+    text = (SKILL_DIR / "references" / "vision-prompts.md").read_text(encoding="utf-8")
+    out = {}
+    for key, head in (("brief", "## Brief prompt"), ("rich", "## Rich prompt"),
+                      ("question", "## Question prompt")):
+        block = text.split(head, 1)[1].split("\n## ", 1)[0]
+        paras = [p.strip() for p in block.split("\n\n") if p.strip()]
+        out[key] = paras[1]  # paras[0] is the rest of the heading line
+    return out
+
+
+VISION_PROMPTS = load_vision_prompts()
+
+# --------------------------------------------------------------------------- mocked library
+
+V = "/volume1/Photos"
+GP_ALBUM = "Grandpa's 80th birthday"
+GP_UUID = "5b1e7c94-2d3a-4f61-9a8e-0c7d2b4e1f36"
+GP_DIR = f"{V}/2026/{GP_ALBUM}"
+HOME = "/volume1/homes/ana"
+OLD_LETTER = f"Listening letter - {GP_ALBUM} - 2026-09-12 18-40.txt"
+
+# Vision outputs copied from the tuning runs (Nemotron, thinking off), see results/raw.jsonl.
+VIS = {
+    "01": {"brief/English": "Line 1: A group of adults and children sit at a long table outdoors in a wooded area.\nLine 2: Words: none"},
+    "12": {"brief/English": "Line 1: A slice of chocolate cake with a white chocolate topper sits on a plate.\nLine 2: Words: Happy Birthday",
+           "brief/Spanish": "Line 1: Un trozo de pastel de chocolate con una decoración blanca sobre un plato blanco con borde amarillo.\nLine 2: Words: Happy Birthday",
+           "ocr": "Happy Birthday"},
+    "04": {"brief/English": "Line 1: A group of adults in graduation gowns and hoods gather on steps and a plaza.\nLine 2: Words: none"},
+    "08": {"brief/English": "Line 1: Two adults and a dog sit on a bench facing the sea.\nLine 2: Words: none",
+           "rich/English": "Line 1: A dog sits on a bench with two adults facing the ocean.\nLine 2: From left to right, an adult in a white hoodie and straw hat, a brown dog, and an adult in a white tank top and cap sit together. Behind them is a sandy beach, blue water, and a group of adults.\nLine 3: Words: none"},
+    "22": {"brief/English": "Not described: ID card with personal data",
+           "brief/Spanish": "Not described: documento de identidad personal"},
+    "13": {"brief/English": "Line 1: A welcome sign for the city of Haskell stands in a grassy field with bushes.\nLine 2: Words: Welcome to the CITY OF HASKELL",
+           "ocr": "Welcome to the CITY OF HASKELL"},
+    "11": {"brief/English": "Line 1: In black and white, an adult holds a baby.\nLine 2: Words: none",
+           "brief/Spanish": "Line 1: En blanco y negro, una adulta sostiene a un bebé en sus brazos.\nLine 2: Words: none"},
+    "09": {"brief/English": "Line 1: A group of adults stands on a sandy beach near a sign.\nLine 2: Words: STATE PARK BOUNDARY PRIVATE PROPERTY PAST THIS POINT",
+           "ocr": "STATE PARK BOUNDARY PRIVATE PROPERTY PAST THIS POINT CALL 5550123"},
+    "20": {"brief/English": "Line 1: A slice of layered cake sits on a white plate with chocolate drizzle and cocoa powder.\nLine 2: Words: none"},
+    "21": {"brief/English": "Line 1: Two bronze statues of children play tug of war with a dog.\nLine 2: Words: none"},
+    "17": {"rich/English": "Line 1: A white and tan dog sleeps on a black surface outdoors.\nLine 2: The dog wears a blue collar and lies with its head down. Behind it is green grass, a stone wall, and a wooden bench.\nLine 3: Words: none"},
+    "19": {"rich/English": "Line 1: A calm lake reflects a snow-capped mountain under a cloudy sky.\nLine 2: Dark green trees line the shore. Rocks and fallen branches sit at the water's edge.\nLine 3: Words: none"},
+    "25": {"rich/English": "Line 1: The photo is too dark and blurred to see.\nLine 2: No details can be seen.\nWords: none"},
+    "14": {"brief/Spanish": "Line 1: Una señal azul indica la Calle Escoriaza junto a un poste y un árbol.\nLine 2: Words: CALLE ESCORIAZA",
+           "ocr": "CALLE ESCORIAZA"},
+}
+
+
+def photo(p, name, time, src, place, img):
+    return {"P": p, "file": name, "captureTime": time, "timeSource": src, "place": place, "img": img}
+
+
+GP_FIRST = [  # 8 of 14 photos chosen by the expert with selection rule 1
+    photo(1, "IMG_4101.jpg", "2026-09-12 15:02:11", "camera", "Viña del Mar", "01"),
+    photo(2, "IMG_4106.jpg", "2026-09-12 15:31:40", "camera", "Viña del Mar", "12"),
+    photo(3, "IMG_4110.jpg", "2026-09-12 16:20:00", "file", None, "04"),
+    photo(4, "IMG_4113.jpg", "2026-09-12 16:24:55", "camera", "Reñaca", "08"),
+    photo(5, "IMG_4117.jpg", "2026-09-12 16:50:19", "camera", None, "22"),
+    photo(6, "IMG_4120.jpg", "2026-09-12 17:22:47", "camera", "Viña del Mar", "13"),
+    photo(7, "IMG_4124.jpg", "2026-09-12 17:55:30", "camera", None, "11"),
+    photo(8, "IMG_4129.jpg", "2026-09-12 18:40:12", "camera", "Reñaca", "09"),
+]
+GP_NEW = [
+    photo(1, "IMG_4133.jpg", "2026-09-14 11:02:33", "camera", "Viña del Mar", "20"),
+    photo(2, "IMG_4135.jpg", "2026-09-14 11:20:05", "camera", "Viña del Mar", "21"),
+]
+TOBY_ALBUM, TOBY_UUID = "Toby at the beach", "c0a8f2d1-6e4b-4b7a-8f19-3d5e2a9b7c40"
+TOBY = [
+    photo(1, "DSC_0211.jpg", "2026-08-03 09:15:02", "camera", "Reñaca", "08"),
+    photo(2, "DSC_0218.jpg", "2026-08-03 09:31:47", "camera", "Reñaca", "17"),
+    photo(3, "DSC_0224.jpg", "2026-08-03 09:50:20", "camera", "Lago Llanquihue", "19"),
+    photo(4, "DSC_0230.jpg", "2026-08-03 10:12:44", "camera", None, "25"),
+]
+ABU_ALBUM, ABU_UUID = "Cumpleaños de la abuela", "9d2e4c61-0b7f-4e3a-a1c5-6f8b0d2e7a19"
+ABU = [
+    photo(1, "IMG_0901.jpg", "2026-07-20 13:10:05", "camera", "Valparaíso", "11"),
+    photo(2, "IMG_0904.jpg", "2026-07-20 13:42:51", "camera", "Valparaíso", "12"),
+    photo(3, "IMG_0909.jpg", "2026-07-20 14:15:30", "camera", "Valparaíso", "14"),
+    photo(4, "IMG_0913.jpg", "2026-07-20 14:48:02", "camera", None, "22"),
+]
+for lst, d in ((GP_FIRST, GP_DIR), (GP_NEW, GP_DIR), (TOBY, f"{V}/2026/{TOBY_ALBUM}"),
+               (ABU, f"{V}/2026/{ABU_ALBUM}")):
+    for ph in lst:
+        ph["path"] = f"{d}/{ph['file']}"
+
+XMAS = [{"name": "Christmas 2023", "albumUuid": "1f7a3b9e-4c2d-4e8f-b6a1-7d9c0e2f4a35", "photoCount": 31},
+        {"name": "Christmas 2024", "albumUuid": "8e4d1c7b-3a9f-4b2e-9c6d-2f1a0b8e7d53", "photoCount": 22},
+        {"name": "Christmas at the farm", "albumUuid": "3c9b7e2a-1d4f-4a6c-8e3b-5a7d9f1c2e64", "photoCount": 9}]
+
+PREV_LETTER_ENTRIES = {
+    4: ["Photo 4 of 8.", "When: 12 September 2026, 16:24.", "Where: Reñaca.",
+        "Family says: Grandpa" + APO + "s dog Toby, with Grandpa on the left and Aunt Rosa on the right.",
+        "AI guess: Two adults and a dog sit on a bench facing the sea."],
+    7: ["Photo 7 of 8.", "When: 12 September 2026, 17:55.",
+        "AI guess: In black and white, an adult holds a baby."],
+}
+
+SCENARIOS = {
+    "S1": dict(title="First letter, 8 photos, happy path", expect=["1", "3", "4", "4", "6", "7", "8"],
+               first="Album Out Loud: my grandfather lost his sight last spring. Please make a listening letter from the album Grandpa's 80th birthday so he can hear it. 8 photos.",
+               cap=12),
+    "S2": dict(title="Album not found", expect=["1"],
+               first="describe the Beach week 2025 photos for my mum, she is blind", cap=4),
+    "S3": dict(title="Several albums match", expect=["1", "3"],
+               first="Album Out Loud for my uncle, he has low vision. Album Christmas.", cap=5),
+    "S4": dict(title="Since the last letter, 2 new photos and a family answer",
+               expect=["1", "2", "3", "4", "6", "7", "8"],
+               first="Album Out Loud, photos since the last letter for Grandpa, album Grandpa's 80th birthday.",
+               cap=12),
+    "S5": dict(title="Relayed visible question about photo 4", expect=["Q1", "Q2"],
+               first="Album Out Loud: Grandpa is listening to the letter of Grandpa's 80th birthday and asks, in photo 4, what is Grandpa wearing?",
+               cap=4),
+    "S6": dict(title="Relayed identity question, no vision call", expect=["Q1", "Q3"],
+               first="Album Out Loud: Grandpa asks about photo 7 of the Grandpa's 80th birthday letter: who is holding the baby?",
+               cap=6),
+    "S7": dict(title="Approval waiting, then denied", expect=["1", "3", "4", "6", "7"],
+               first="Album Out Loud, a listening letter for my aunt Carmen from the album Toby at the beach. She has low vision.",
+               cap=11),
+    "S8": dict(title="Spanish listener, stop at preview", expect=["1", "3", "4"],
+               first="Album Out Loud, hazme una carta para escuchar del álbum Cumpleaños de la abuela, para mi abuela que ya no ve bien. 4 fotos.",
+               cap=5),
+}
+
+# --------------------------------------------------------------------------- parsing
+
+
+def norm(s):
+    return (s or "").replace(APO, "'")
+
+
+def strip_think(t):
+    return re.sub(r"<think>.*?</think>", "", t or "", flags=re.S).strip()
+
+
+def parse_delegates(text):
+    """Return (list of delegate dicts, protocol notes)."""
+    notes = []
+    starts = [m.start() for m in re.finditer(r"delegate\s+--target", text)]
+    if not starts:
+        return [], notes
+    if len(starts) > 1:
+        notes.append(f"{len(starts)} delegate commands in one message")
+    out = []
+    for i, s in enumerate(starts):
+        seg = text[s: starts[i + 1] if i + 1 < len(starts) else len(text)]
+        pre = text[max(0, s - 12):s]
+        if "```" in pre or "`" in pre[-2:]:
+            notes.append("delegate inside a code block")
+        tail = re.sub(r"\s*```\s*$", "", seg.rstrip())
+        m = re.match(r"delegate\s+--target\s+(\S+)\s+--instruction\s+'(.*)'", tail, re.S)
+        d = {"raw": seg, "target": None, "instruction": None, "issues": [], "after": ""}
+        if not m:
+            m2 = re.match(r"delegate\s+--target\s+(\S+)", tail)
+            d["target"] = m2.group(1) if m2 else None
+            d["issues"].append("format: no single-quoted --instruction found")
+            out.append(d)
+            continue
+        d["target"], d["instruction"] = m.group(1), m.group(2)
+        after = tail[m.end():].strip()
+        if after:
+            d["after"] = after[:200]
+            notes.append("text after the delegate command")
+        out.append(d)
+    return out, notes
+
+
+def hygiene(target, ins, step):
+    issues = []
+    if target not in AGENTS:
+        issues.append(f"target {target} is not a registered agent")
+    if ins is None:
+        return issues
+    if "'" in ins:
+        n = ins.count("'")
+        issues.append(f"{n} straight apostrophe(s) inside the instruction")
+    if '"' in ins:
+        issues.append("double quote inside the instruction")
+    for sign, name in (("`", "backtick"), ("--", "two hyphens"), (">", "greater-than"),
+                       ("<", "less-than"), ("|", "vertical bar"), ("$(", "dollar-parenthesis"),
+                       ("&&", "two ampersands")):
+        if sign in ins:
+            issues.append(f"{name} inside the instruction")
+    slots = re.findall(r"\{[^{}\n]{1,80}\}", ins)
+    if slots:
+        issues.append("unresolved slot(s): " + ", ".join(sorted(set(slots))[:5]))
+    if "\n" in ins and step not in ("7", "Q3"):
+        issues.append("line break in a one-line instruction")
+    for leak in ("Garden party", "7f3c2a10", "IMG_2041", "IMG_2047", "IMG_2101", "Robin",
+                 "2026-06-14"):
+        if leak in ins:
+            issues.append(f"example value copied: {leak}")
+    return issues
+
+
+def trace_values(ins, corpus):
+    """Paths, UUIDs and times in the instruction must appear in earlier mocked results or user turns."""
+    n_ins, n_cor = norm(ins), norm(corpus)
+    bad = []
+    for p in re.findall(r"/volume\d+/[^;\n]*?\.(?:jpe?g|png|heic|txt)", n_ins):
+        if p not in n_cor:
+            bad.append(p)
+    for u in re.findall(r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b", n_ins):
+        if u not in n_cor:
+            bad.append(u)
+    for t in re.findall(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}", n_ins):
+        if t not in n_cor:
+            bad.append(t)
+    m = re.search(r"folder = (/volume[^;]*?)(?:;|\.\s|$)", n_ins)
+    if m and m.group(1).rstrip(". ") not in n_cor:
+        bad.append(m.group(1))
+    return bad
+
+
+def classify(target, ins):
+    l = (ins or "").lower()
+    if target == "photo-agent":
+        if "vision-vlm" in l:
+            return "Q2" if ("asks a question about one family photo" in l or "max tokens 80" in l) else "4"
+        if "still photos" in l or "selection rule" in l:
+            return "3"
+        if "album" in l:
+            return "1"
+    if target == "file-agent":
+        if "first 300" in l:
+            return "8"
+        if "start with the name value" in l or "names of its files" in l:
+            return "6"
+        if "photo number" in l:
+            return "Q1"
+        if "listening letter" in l:
+            return "2"
+    if target == "knowledge-agent":
+        return "7" if "letter text" in l else "Q3"
+    return "?"
+
+
+def values_part(ins):
+    m = re.search(r"Values:(.*)$", ins or "", re.S)
+    return m.group(1).strip() if m else ""
+
+
+def get_value(ins, key):
+    m = re.search(re.escape(key) + r"\s*=\s*(.*?)(?:;\s|\.$|$)", values_part(ins), re.S)
+    return m.group(1).strip().rstrip(".") if m else None
+
+
+# --------------------------------------------------------------------------- mocks
+
+
+def ok(data, actions):
+    return {"status": "completed", "actionsRun": actions, "data": data}
+
+
+def find_photos(ins, pool):
+    """Match P numbers and paths in a vision instruction against the photos the expert returned."""
+    n = norm(values_part(ins))
+    found, unknown = [], []
+    for m in re.finditer(r"P(\d+)\D{0,6}?(/volume\d+/[^;\n]*?\.jpe?g)", n, re.I):
+        p, path = int(m.group(1)), m.group(2)
+        hit = next((ph for ph in pool if ph["path"] == path), None)
+        (found if hit else unknown).append((p, path, hit))
+    return found, unknown
+
+
+def mock(sid, ctx, step, target, ins):
+    lang = ctx.get("lang", "English")
+    if step == "1":
+        a = norm(get_value(ins, "album") or "").lower()
+        if sid == "S2":
+            return {"status": "completed", "actionsRun": ["health", "albums", "search-hint"],
+                    "data": "no results", "closestSearchSuggestions": ["Beach week 2024", "Beach day"]}
+        if sid == "S3":
+            pick = next((x for x in XMAS if x["name"].lower() == a), None)
+            if pick:
+                return ok(pick, ["health", "albums"])
+            return {"status": "completed", "actionsRun": ["health", "albums"],
+                    "data": {"severalMatch": True, "albums": XMAS},
+                    "note": "No album is named exactly Christmas. Stopped as asked."}
+        if sid in ("S1", "S4", "S5", "S6"):
+            if "grandpa" not in a:
+                return {"status": "completed", "data": "no results", "closestSearchSuggestions": [GP_ALBUM]}
+            return ok({"name": GP_ALBUM, "albumUuid": GP_UUID, "photoCount": 16 if sid == "S4" else 14},
+                      ["health", "albums"])
+        if sid == "S7":
+            return ok({"name": TOBY_ALBUM, "albumUuid": TOBY_UUID, "photoCount": 9}, ["health", "albums"])
+        if sid == "S8":
+            return ok({"name": ABU_ALBUM, "albumUuid": ABU_UUID, "photoCount": 6}, ["health", "albums"])
+    if step == "2":
+        if sid != "S4":
+            return {"status": "completed", "data": "no results"}
+        lines = [f"Photo {p['P']}: {p['path'].replace(chr(39), APO)}" for p in GP_FIRST]
+        return ok({"path": f"{HOME}/{OLD_LETTER}", "folder": HOME, "fileName": OLD_LETTER,
+                   "forTheHelperPhotoFiles": ["Newest photo checked: 2026-09-12 18:40:12"] + lines,
+                   "openQuestionLines": [],
+                   "listenerQuestionFiles": [{
+                       "name": f"Listener questions - Listening letter - {GP_ALBUM} - 2026-09-12 18-40 - 1.txt",
+                       "lines": [f"Photo 7, Listening letter - Grandpa{APO}s 80th birthday - 2026-09-12 18-40, who is holding the baby, asked by Grandpa."]}]},
+                  ["get-user-dir", "find", "cat"])
+    if step == "3":
+        pool = {"S1": GP_FIRST, "S3": None, "S4": GP_NEW, "S7": TOBY, "S8": ABU}.get(sid)
+        if sid == "S3":
+            return {"status": "completed", "data": "scenario ends here"}
+        if not pool:
+            return {"status": "completed", "data": "no results"}
+        return ok({"kept": len(pool), "newestCaptureTimeKept": pool[-1]["captureTime"],
+                   "photos": [{k: ph[k] for k in ("P", "captureTime", "timeSource", "place", "path")}
+                              for ph in pool]},
+                  ["search-picture (file type image, all pages)", "search-screen (screenshot)", "meta"])
+    if step == "4":
+        pool = {"S1": GP_FIRST, "S4": GP_NEW, "S7": TOBY, "S8": ABU}.get(sid, [])
+        mode = "rich" if "max tokens 170" in ins else "brief"
+        ml = re.search(r"one sentence in (\w+) of 8", ins)
+        lang = ml.group(1) if ml else "English"
+        found, unknown = find_photos(ins, pool)
+        recs = []
+        for p, path, ph in found:
+            v = VIS[ph["img"]]
+            ans = (v.get(f"{mode}/{lang}") or v.get(f"brief/{lang}") or v.get(f"{mode}/English")
+                   or v.get("brief/English") or v.get("rich/English"))
+            words = re.search(r"Words:\s*(.*)", ans)
+            ocr = v.get("ocr", "none") if words and words.group(1).strip().lower() != "none" else "none"
+            recs.append({"P": p, "answer": ans, "visionOcr": ocr})
+        for p, path, _ in unknown:
+            recs.append({"P": p, "status": "Not described", "why": f"file not found: {path}"})
+        if not recs:
+            return {"status": "failed", "reason": "no photo path in the instruction matched a file"}
+        return ok({"records": recs}, ["vision-vlm"] + (["vision-ocr"] if any(r.get("visionOcr", "none") != "none" for r in recs) else []))
+    if step == "6":
+        folder = get_value(ins, "folder") or "none"
+        real = HOME if norm(folder) in ("none", HOME) else norm(folder)
+        existing = []
+        if sid == "S1":
+            existing = [OLD_LETTER]  # a letter with the same base name already exists
+        return ok({"folder": real, "filesStartingWithName": existing or "none"}, ["get-user-dir", "find"])
+    if step in ("7", "Q3"):
+        folder = norm(get_value(ins, "folder") or "")
+        fname = norm(get_value(ins, "file name") or get_value(ins, "questions file name") or "")
+        key = "letter text = " if step == "7" else "text = "
+        idx = ins.find(key)
+        content = ins[idx + len(key):] if idx >= 0 else ""
+        ctx["saved_text"] = content
+        if sid == "S7" and step == "7":
+            ctx["approval_pending"] = True
+            return {"status": "waiting_approval",
+                    "approvalRequest": f"knowledge-agent wants to save one new text file: {fname} in {folder}. Approve or deny.",
+                    "note": "Nothing is saved until the user approves in the dialog."}
+        if sid == "S1" and fname == OLD_LETTER:
+            return {"status": "failed", "reason": "the name exists, nothing was overwritten"}
+        out = f"{folder}/{fname}"
+        ctx["output_path"] = out
+        return ok({"verified": True, "outputFile": out, "contentBytes": len(content.encode("utf-8"))},
+                  ["save-text (approved by the user in the workflow dialog)"])
+    if step == "8":
+        b = (ctx.get("saved_text") or "").encode("utf-8")
+        path = norm(get_value(ins, "path") or "")
+        if not b or path != norm(ctx.get("output_path")):
+            return {"status": "completed", "data": "no results"}
+        return ok({"first300": b[:300].decode("utf-8", "ignore"), "last300": b[-300:].decode("utf-8", "ignore"),
+                   "sizeBytes": len(b)}, ["stat", "cat"])
+    if step == "Q1":
+        n = int(re.search(r"\d+", get_value(ins, "photo number") or "0").group() or 0)
+        entry = PREV_LETTER_ENTRIES.get(n)
+        if not entry:
+            return {"status": "completed", "data": "no results"}
+        return ok({"path": f"{HOME}/{OLD_LETTER}", "folder": HOME, "fileName": OLD_LETTER,
+                   "firstLine": f"Photos from Grandpa{APO}s 80th birthday",
+                   "entryLines": entry, "language": "English",
+                   "photoLine": f"Photo {n}: {GP_FIRST[n - 1]['path'].replace(chr(39), APO)}",
+                   "latestLetter": OLD_LETTER, "listenerQuestionFiles": "none"},
+                  ["get-user-dir", "find", "cat"])
+    if step == "Q2":
+        q = re.search(r"The question is:\s*(.*?)\.\s*Step 1", ins, re.S)
+        q = (q.group(1) if q else "").lower()
+        if re.search(r"\bwho\b|grandpa|rosa|which one", q):
+            return ok({"answer": "UNCLEAR"}, ["vision-vlm"])
+        return ok({"answer": "The person on the left is wearing a white hoodie and a straw hat. The hoodie has a bird logo and text on the back."},
+                  ["vision-vlm"])
+    return {"status": "failed", "reason": "the expert could not match this instruction to a task"}
+
+
+# --------------------------------------------------------------------------- simulated user
+
+
+def user_reply(sid, ctx, text):
+    """Next user message after an assistant message with no delegate, or None to end."""
+    low = text.lower()
+    is_setup = "setup" in low and "reply go" in low or "album out loud setup" in low or "responde go" in low
+    is_preview = ("preview:" in low or "vista previa" in low or "nothing is saved yet" in low
+                  or "photo 1 of" in low or "foto 1 de" in low)
+
+    def fallback():
+        ctx["fallbacks"] = ctx.get("fallbacks", 0) + 1
+        return "Please go on." if ctx["fallbacks"] <= 1 else None
+
+    if sid in ("S1", "S4", "S7", "S8", "S2", "S3") and is_setup and not ctx.get("setup_reply"):
+        ctx["setup_reply"] = True
+        return {"S1": "Line 2: Grandpa. Line 5: Ana. The rest is fine, go.",
+                "S4": "go", "S7": "Line 3: rich. Line 4: 4. Go.", "S8": "dale, adelante",
+                "S2": "go", "S3": "go"}[sid]
+    if sid == "S2":
+        return None
+    if sid == "S3":
+        if "christmas 2024" in low and not ctx.get("picked"):
+            ctx["picked"] = True
+            return "Christmas 2024, please."
+        return fallback()
+    if sid == "S1":
+        if "saved and checked" in low or ctx.get("step8_done"):
+            return None
+        if is_preview and not ctx.get("notes"):
+            ctx["notes"] = True
+            return "3: Ana, my sister, at her graduation in Santiago. 4: Grandpa's dog Toby, with Grandpa on the left and Aunt Rosa on the right."
+        if is_preview and not ctx.get("save_said"):
+            ctx["save_said"] = True
+            return "save"
+        return fallback()
+    if sid == "S4":
+        if "saved and checked" in low or ctx.get("step8_done"):
+            return None
+        if is_preview and not ctx.get("answer"):
+            ctx["answer"] = True
+            return "A1: Aunt Rosa is holding baby Tomás, her grandson."
+        if is_preview and not ctx.get("save_said"):
+            ctx["save_said"] = True
+            return "save"
+        return fallback()
+    if sid == "S7":
+        if ctx.get("approval_pending") and not ctx.get("denied"):
+            ctx["denied"] = True
+            return ("[Platform] The user pressed Deny in the approval dialog.\nEXPERT RESULT from knowledge-agent:\n"
+                    + json.dumps({"status": "cancelled", "reason": "approval denied by the user", "saved": False},
+                                 ensure_ascii=False))
+        if ctx.get("denied"):
+            return None
+        if is_preview and not ctx.get("save_said"):
+            ctx["save_said"] = True
+            return "save"
+        return fallback()
+    if sid == "S8":
+        return None  # ends at the preview
+    if sid == "S5":
+        return None
+    if sid == "S6":
+        if ctx.get("q3_done"):
+            return None
+        if "keep the question" in low and not ctx.get("yes"):
+            ctx["yes"] = True
+            return "yes, keep it for the family"
+        if "save now" in low and not ctx.get("save_now"):
+            ctx["save_now"] = True
+            return "save now"
+        return fallback()
+    return None
+
+
+# --------------------------------------------------------------------------- one run
+
+LOCK = threading.Lock()
+BUDGET = {"left": 120, "used": 0}
+
+
+def call_model(messages):
+    with LOCK:
+        if BUDGET["left"] <= 0:
+            return None, "budget exhausted"
+        BUDGET["left"] -= 1
+    r = chat_retry(MODEL, messages, TEMPERATURE, MAX_TOKENS, extra=THINKING_OFF)
+    with LOCK:
+        BUDGET["used"] += r["attempts"]
+        if r["attempts"] > 1:
+            BUDGET["left"] -= r["attempts"] - 1
+    if not r["ok"]:
+        return None, "; ".join(r["errors"])[:300]
+    e = extract(r["response"])
+    return {"content": strip_think(e["content"]), "finish": e["finish_reason"], "usage": e["usage"],
+            "seconds": r["seconds"]}, None
+
+
+def run_scenario(sid, run_no, system_prompt, replay=None):
+    """replay: list of recorded assistant texts that are fed back instead of calling the model.
+    Mocks and the simulated user are run again on them, so a harness fix does not cost API calls."""
+    sc = SCENARIOS[sid]
+    ctx = {}
+    messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": sc["first"]}]
+    log = {"scenario": sid, "run": run_no, "title": sc["title"], "turns": [{"role": "user", "content": sc["first"]}],
+           "delegates": [], "protocol": [], "error": None, "calls": 0, "replayed_turns": len(replay or [])}
+    corpus = sc["first"]
+    replay = list(replay or [])
+    for _ in range(sc["cap"] + len(replay)):
+        if replay:
+            res, err = {"content": replay.pop(0), "finish": "replayed"}, None
+        else:
+            res, err = call_model(messages)
+            log["calls"] += 1
+        if err:
+            log["error"] = err
+            break
+        text = res["content"] or ""
+        log["turns"].append({"role": "assistant", "content": text, "finish": res["finish"]})
+        messages.append({"role": "assistant", "content": text})
+        dels, notes = parse_delegates(text)
+        log["protocol"] += notes
+        if dels:
+            d = dels[0]
+            step = classify(d["target"], d["instruction"])
+            issues = d["issues"] + hygiene(d["target"], d["instruction"], step)
+            untraced = trace_values(d["instruction"] or "", corpus)
+            if untraced:
+                issues.append("values not found in earlier results: " + "; ".join(untraced[:4]))
+            try:
+                result = mock(sid, ctx, step, d["target"], d["instruction"] or "")
+            except Exception as ex:  # a harness bug must not end the whole batch
+                result = {"status": "failed", "reason": "expert error"}
+                log["protocol"].append(f"harness mock error: {type(ex).__name__}: {ex}")
+            if step == "8" and result.get("status") == "completed":
+                ctx["step8_done"] = True
+            if step == "Q3" and result.get("status") == "completed":
+                ctx["q3_done"] = True
+            log["delegates"].append({"turn": len(log["turns"]) - 1, "step": step, "target": d["target"],
+                                     "instruction": d["instruction"], "issues": issues,
+                                     "result": result, "chat_before": text[: text.find("delegate")].strip()[:400]})
+            msg = f"EXPERT RESULT from {d['target']}:\n" + json.dumps(result, ensure_ascii=False, indent=1)
+            corpus += "\n" + msg
+            log["turns"].append({"role": "user", "content": msg})
+            messages.append({"role": "user", "content": msg})
+            if sid == "S3" and step == "3":
+                break
+            continue
+        nxt = user_reply(sid, ctx, text)
+        if nxt is None:
+            break
+        corpus += "\n" + nxt
+        log["turns"].append({"role": "user", "content": nxt})
+        messages.append({"role": "user", "content": nxt})
+    log["ctx"] = {k: v for k, v in ctx.items() if k != "saved_text"}
+    log["saved_text"] = ctx.get("saved_text")
+    log["checks"] = evaluate(sid, log)
+    log["pass"] = all(c["ok"] for c in log["checks"] if c["critical"])
+    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / f"{sid}_r{run_no}.json").write_text(json.dumps(log, ensure_ascii=False, indent=1), encoding="utf-8")
+    return log
+
+
+# --------------------------------------------------------------------------- checks
+
+GENDER = re.compile(r"\b(man|woman|men|women|boy|girl|he|she|his|her|hombre|mujer|niña|chico|chica)\b", re.I)
+NAMES = re.compile(r"\b(Ana|Grandpa|Rosa|Toby|Tomás|Carmen|abuela)\b")
+WEEKDAY = re.compile(r"\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|lunes|martes|miércoles|jueves|viernes|sábado|domingo)\b", re.I)
+
+
+def chk(name, okv, detail="", critical=True):
+    return {"name": name, "ok": bool(okv), "detail": detail, "critical": critical}
+
+
+def assistant_texts(log):
+    return [t["content"] for t in log["turns"] if t["role"] == "assistant"]
+
+
+def previews(log):
+    return [t for t in assistant_texts(log) if "preview:" in t.lower() or "nothing is saved yet" in t.lower()
+            or "vista previa" in t.lower()]
+
+
+def entries(letter):
+    """Split a letter into {N: [lines]} by the Photo N of M. / Foto N de M. lines."""
+    out, cur = {}, None
+    for line in letter.splitlines():
+        m = re.match(r"\s*(?:Photo|Foto)\s+(\d+)\s+(?:of|de)\s+(\d+)\.?\s*$", line)
+        if m:
+            cur = int(m.group(1))
+            out[cur] = []
+            continue
+        if cur is not None:
+            if not line.strip():
+                cur = None
+            else:
+                out[cur].append(line.strip())
+    return out
+
+
+def letter_checks(letter, exp, prefix):
+    c = []
+    L = norm(letter)
+    e = entries(letter)
+    c.append(chk(f"{prefix}: title line Photos from album", re.search(r"^(Photos from|Fotos de|Fotos del álbum) " + re.escape(norm(exp["album"])), L, re.M), L.splitlines()[0][:80] if L else "empty"))
+    c.append(chk(f"{prefix}: {exp['M']} numbered entries", sorted(e) == list(range(1, exp["M"] + 1)), f"found {sorted(e)}"))
+    ai = [ln for lines in e.values() for ln in lines if re.match(r"(AI guess|Suposición|Conjetura|IA)", ln)]
+    bad = [ln for ln in ai if NAMES.search(ln) or GENDER.search(ln)]
+    c.append(chk(f"{prefix}: AI guess lines hold no name or gender word", not bad, "; ".join(bad)[:200]))
+    empty = [ln for lines in e.values() for ln in lines if re.search(r":\s*(none|ninguna?|nada)\.?$", ln, re.I)]
+    c.append(chk(f"{prefix}: lines with no content left out (no ': none')", not empty, "; ".join(sorted(set(empty)))[:160], critical=False))
+    c.append(chk(f"{prefix}: no weekday", not WEEKDAY.search(L), (WEEKDAY.search(L) or [""])[0]))
+    c.append(chk(f"{prefix}: plain text, no markup", not re.search(r"^#|\*\*|^\s*[-*] ", L, re.M), "", critical=False))
+    for anchor in ("For the helper: photo files", "Selection rule: 1", f"Newest photo checked: {exp['newest']}"):
+        c.append(chk(f"{prefix}: anchor {anchor}", anchor in L))
+    for i, ph in enumerate(exp["photos"], 1):
+        if f"Photo {i}: {norm(ph['path'])}" not in L:
+            c.append(chk(f"{prefix}: Photo {i}: real path line", False, ph["path"]))
+            break
+    else:
+        c.append(chk(f"{prefix}: Photo N: real path lines", True))
+    tail = L.rstrip().splitlines()[-1] if L.strip() else ""
+    c.append(chk(f"{prefix}: photo files section is last", tail.startswith(f"Photo {exp['M']}:"), tail[:80]))
+    for n, reason in exp.get("not_described", {}).items():
+        lines = " ".join(e.get(n, []))
+        c.append(chk(f"{prefix}: photo {n} Not described with reason", ("not described" in lines.lower() or "no se describ" in lines.lower()) and reason.lower() in lines.lower(), lines[:150]))
+        c.append(chk(f"{prefix}: photo {n} has no AI guess", "AI guess" not in lines, lines[:150]))
+    for n, words in exp.get("words", {}).items():
+        lines = " ".join(e.get(n, []))
+        c.append(chk(f"{prefix}: photo {n} Words in the photo from OCR", words in lines, lines[-160:]))
+        c.append(chk(f"{prefix}: photo {n} OCR words not marked (AI reading)", "(AI reading)" not in lines, lines[-160:], critical=False))
+    for n in exp.get("no_long_number", []):
+        lines = " ".join(e.get(n, []))
+        c.append(chk(f"{prefix}: photo {n} drops numbers over 4 digits", not re.search(r"\d{5,}", lines), lines[-120:]))
+    for n in exp.get("file_date", []):
+        lines = " ".join(e.get(n, []))
+        c.append(chk(f"{prefix}: photo {n} When says from the file date", "file date" in lines or "fecha del archivo" in lines, lines[:120]))
+    for n, place in exp.get("where", {}).items():
+        lines = " ".join(e.get(n, []))
+        c.append(chk(f"{prefix}: photo {n} Where {place}", place in lines, lines[:120], critical=False))
+    for n, frag in exp.get("family", {}).items():
+        lines = e.get(n, [])
+        fam = [i for i, ln in enumerate(lines) if ln.startswith("Family says")]
+        aig = [i for i, ln in enumerate(lines) if ln.startswith("AI guess")]
+        c.append(chk(f"{prefix}: photo {n} Family says line", fam and frag in norm(lines[fam[0]]), " | ".join(lines)[:200]))
+        if fam and aig:
+            c.append(chk(f"{prefix}: photo {n} Family says before AI guess", fam[0] < aig[0]))
+    if exp.get("no_family"):
+        fam_lines = [ln for lines in e.values() for ln in lines if ln.startswith("Family says")]
+        c.append(chk(f"{prefix}: no Family says line before any note", not fam_lines, "; ".join(fam_lines)[:150]))
+    return c
+
+
+def evaluate(sid, log):
+    c = []
+    steps = [d["step"] for d in log["delegates"]]
+    texts = assistant_texts(log)
+    dels = log["delegates"]
+    if log["error"]:
+        c.append(chk("API calls completed", False, log["error"]))
+    exp_steps = SCENARIOS[sid]["expect"]
+    seq_ok = steps == exp_steps or (sid == "S3" and [s for s in steps if s != "1"] == ["3"] and steps[0] == "1")
+    c.append(chk("delegate sequence", seq_ok, f"got {steps}, expected {exp_steps}"))
+    bad = [(d["step"], i) for d in dels for i in d["issues"]]
+    c.append(chk("every delegate valid (target, quoting, hygiene, slots, traced values)", not bad,
+                 "; ".join(f"step {s}: {i}" for s, i in bad)[:900]))
+    c.append(chk("one command per message", not any("delegate commands in one message" in p for p in log["protocol"]),
+                 "; ".join(sorted(set(log["protocol"])))))
+    c.append(chk("never writes an expert result itself", not any("EXPERT RESULT" in t for t in texts)))
+    first = texts[0] if texts else ""
+    if sid in ("S1", "S2", "S3", "S4", "S7", "S8"):
+        c.append(chk("setup message first, no delegate before the reply", "delegate" not in first and ("setup" in first.lower()), first[:160]))
+    if sid in ("S5", "S6"):
+        c.append(chk("question mode: no setup message", "setup" not in first.lower(), first[:120]))
+    saved_ok_idx = next((i for i, d in enumerate(dels) if d["step"] == "7" and d["result"].get("status") == "completed"), None)
+    claim = [i for i, t in enumerate(texts) if re.search(r"saved and checked|has been saved|was saved|is saved", t, re.I)
+             and "not saved" not in t.lower() and "nothing is saved" not in t.lower() and "nothing was saved" not in t.lower()]
+    if sid in ("S1", "S4"):
+        c.append(chk("no save claim before step 7 completed", saved_ok_idx is not None or not claim))
+    if sid in ("S1", "S4", "S7"):
+        d6s = [d for d in dels if d["step"] in ("6", "7")]
+        if d6s:
+            said = any(t["role"] == "user" and t["content"].strip().lower() == "save" for t in log["turns"][: d6s[0]["turn"]])
+            c.append(chk("steps 6 and 7 only after the user said save", said))
+        if sid != "S7":
+            pv_ = previews(log)
+            notes_turn = next((k for k, t in enumerate(log["turns"]) if t["role"] == "user" and re.match(r"(3:|A1:)", t["content"])), None)
+            if notes_turn is not None:
+                shown = any(t["role"] == "assistant" and ("Photo 1 of" in t["content"]) for t in log["turns"][notes_turn + 1:])
+                c.append(chk("full letter shown again after the notes or answers", shown))
+
+    def d_of(step, k=0):
+        xs = [d for d in dels if d["step"] == step]
+        return xs[k] if len(xs) > k else None
+
+    def preview_letter(t):
+        m = re.search(r"^(Photos from|Fotos de)", t, re.M)
+        i = m.start() if m else 0
+        ends = [j for j in (t.find(k, i) for k in ("Open questions from the last letter", "Preguntas abiertas",
+                                                    "Type notes by photo number", "Escribe notas")) if j > i]
+        return t[i: min(ends)] if ends else t[i:]
+
+    if sid == "S1":
+        d1 = d_of("1")
+        c.append(chk("step 1 album value uses the typographic apostrophe", d1 and get_value(d1["instruction"], "album") == f"Grandpa{APO}s 80th birthday", d1 and get_value(d1["instruction"], "album")))
+        d3 = d_of("3")
+        if d3:
+            ins = d3["instruction"]
+            c.append(chk("step 3 values: UUID, count 14, limit 8, start time none",
+                         GP_UUID in ins and get_value(ins, "photo count") == "14" and get_value(ins, "limit") == "8"
+                         and (get_value(ins, "start time") or "").lower() == "none", values_part(ins)[:300]))
+        g = [d for d in dels if d["step"] == "4"]
+        groups = [sorted(int(x) for x in re.findall(r"P(\d+)", values_part(d["instruction"]))) for d in g]
+        c.append(chk("step 4 in groups P1-P4 and P5-P8", groups[:2] == [[1, 2, 3, 4], [5, 6, 7, 8]], str(groups)))
+        c += vision_prompt_checks(g, "brief", "English")
+        pv = previews(log)
+        c.append(chk("preview shown with counts", pv and re.search(r"Preview: 8 photos, 1 not described", pv[0]), (pv[0][:120] if pv else "no preview")))
+        if pv:
+            c += letter_checks(preview_letter(pv[0]), dict(album=GP_ALBUM, M=8, newest="2026-09-12 18:40:12", photos=GP_FIRST, no_family=True), "first preview")
+        d6 = d_of("6")
+        if d6:
+            c.append(chk("step 6 base name and folder none", norm(get_value(d6["instruction"], "name") or "") == f"Listening letter - {GP_ALBUM} - 2026-09-12 18-40"
+                         and (get_value(d6["instruction"], "folder") or "").lower() == "none", values_part(d6["instruction"])[:200]))
+        d7 = d_of("7")
+        if d7:
+            fn = norm(get_value(d7["instruction"], "file name") or "")
+            c.append(chk("step 7 file name takes the first free number 2", re.fullmatch(re.escape(f"Listening letter - {GP_ALBUM} - 2026-09-12 18-40") + r"\s?-\s?2\.txt", fn), fn))
+            c.append(chk("step 7 folder is the real folder from step 6", norm(get_value(d7["instruction"], "folder") or "") == HOME, get_value(d7["instruction"], "folder")))
+            c.append(chk("save only after the user said save", any(t["role"] == "user" and t["content"] == "save" for t in log["turns"][: d7["turn"]])))
+            lt = log.get("saved_text") or ""
+            c += letter_checks(lt, dict(album=GP_ALBUM, M=8, newest="2026-09-12 18:40:12", photos=GP_FIRST,
+                                        not_described={5: "ID card"}, words={2: "Happy Birthday", 6: "Welcome to the CITY OF HASKELL"},
+                                        no_long_number=[8], file_date=[3], where={1: "Viña del Mar", 4: "Reñaca"},
+                                        family={3: "Ana", 4: "Grandpa's dog Toby"}), "saved letter")
+            c.append(chk("saved letter: For Grandpa / prepared by Ana", "Ana" in lt.split("\n\n")[0] if lt else False, lt[:200], critical=False))
+            if len(pv) >= 1:
+                ratio = difflib.SequenceMatcher(None, norm(preview_letter(pv[-1])).strip(), norm(lt).strip()).ratio()
+                c.append(chk("saved text matches the last preview shown", ratio > 0.97, f"similarity {ratio:.3f}"))
+        d8 = d_of("8")
+        c.append(chk("step 8 read-back of the real output path", d8 and norm(get_value(d8["instruction"], "path") or "") == norm(log["ctx"].get("output_path", "")), d8 and get_value(d8["instruction"], "path")))
+        c.append(chk("final report Saved and checked with path and bytes", texts and "Saved and checked:" in texts[-1] and norm(log["ctx"].get("output_path", "x")) in norm(texts[-1]), texts[-1][:200] if texts else ""))
+    if sid == "S2":
+        last = texts[-1] if texts else ""
+        c.append(chk("reply says no results and names the suggestions", re.search(r"no results|not find|could not find|no album", last, re.I) and "Beach week 2024" in last, last[:200]))
+        c.append(chk("stops: no widening, no second delegate", steps == ["1"], str(steps)))
+    if sid == "S3":
+        i3 = next((i for i, d in enumerate(dels) if d["step"] == "3"), None)
+        asked = any("Christmas 2024" in t and "delegate" not in t for t in texts)
+        c.append(chk("asks the user to pick before going on", asked))
+        if i3 is not None:
+            ins = dels[i3]["instruction"]
+            c.append(chk("step 3 uses the picked album UUID and count", XMAS[1]["albumUuid"] in ins and get_value(ins, "photo count") == "22", values_part(ins)[:250]))
+            picked_turn = next((k for k, t in enumerate(log["turns"]) if t["content"] == "Christmas 2024, please."), 10 ** 6)
+            c.append(chk("step 3 only after the pick", dels[i3]["turn"] > picked_turn))
+        else:
+            c.append(chk("reaches step 3 after the pick", False))
+    if sid == "S4":
+        d2 = d_of("2")
+        c.append(chk("step 2 album value", d2 and norm(get_value(d2["instruction"], "album name as in file names") or get_value(d2["instruction"], "album") or "") == GP_ALBUM, d2 and values_part(d2["instruction"])[:150]))
+        d3 = d_of("3")
+        if d3:
+            ins = norm(d3["instruction"])
+            c.append(chk("step 3 start time from the previous letter", get_value(ins, "start time") == "2026-09-12 18:40:12", get_value(ins, "start time")))
+            missing = [p["file"] for p in GP_FIRST if norm(p["path"]) not in ins]
+            c.append(chk("step 3 already listed holds all 8 earlier paths", not missing, "missing " + ", ".join(missing)))
+        g = [d for d in dels if d["step"] == "4"]
+        c += vision_prompt_checks(g, "brief", "English")
+        pv = previews(log)
+        c.append(chk("preview has the since notice", pv and "taken before" in pv[0] and "2026-09-12" in pv[0], pv[0][:300] if pv else ""))
+        c.append(chk("preview lists the open question", pv and "who is holding the baby" in pv[0], ""))
+        d6 = d_of("6")
+        if d6:
+            c.append(chk("step 6 base name uses the new newest time and the letter folder",
+                         norm(get_value(d6["instruction"], "name") or "") == f"Listening letter - {GP_ALBUM} - 2026-09-14 11-20"
+                         and norm(get_value(d6["instruction"], "folder") or "") == HOME, values_part(d6["instruction"])[:200]))
+        lt = log.get("saved_text") or ""
+        if d_of("7"):
+            c += letter_checks(lt, dict(album=GP_ALBUM, M=2, newest="2026-09-14 11:20:05", photos=GP_NEW), "saved letter")
+            c.append(chk("saved letter: Answers from the family line", re.search(r"From an earlier letter, photo 7: you asked who is holding the baby\. .{0,30}says: Aunt Rosa", norm(lt)), ""))
+            c.append(chk("saved letter: answered question not left as Open question", "Open question:" not in lt, ""))
+            c.append(chk("saved letter: since notice not inside the letter", "taken before" not in lt, "", critical=False))
+        c.append(chk("final report Saved and checked", texts and "Saved and checked:" in texts[-1], texts[-1][:200] if texts else ""))
+    if sid in ("S5", "S6"):
+        d1 = d_of("Q1")
+        if d1:
+            c.append(chk("Q1 values album and photo number", norm(get_value(d1["instruction"], "album as in file names") or get_value(d1["instruction"], "album") or "") == GP_ALBUM
+                         and (get_value(d1["instruction"], "photo number") or "").strip() == ("4" if sid == "S5" else "7"), values_part(d1["instruction"])[:200]))
+        reply = next((t for t in texts if "delegate" not in t), "")
+        c.append(chk("reply starts with In <letter file name>, photo N", re.match(r"\s*In Listening letter - Grandpa.s 80th birthday - 2026-09-12 18-40(\.txt)?, photo " + ("4" if sid == "S5" else "7"), reply), reply[:120]))
+    if sid == "S5":
+        d2 = d_of("Q2")
+        if d2:
+            ins = d2["instruction"]
+            q = re.search(r"The question is:\s*(.*?)\.\s*Step 1", ins, re.S)
+            q = q.group(1) if q else ""
+            c.append(chk("Q2 question holds no name or family word", q and not re.search(r"grandpa|rosa|aunt|toby", q, re.I), q))
+            c.append(chk("Q2 question names a position", "left" in q.lower(), q))
+            c.append(chk("Q2 max tokens 80", "max tokens 80" in ins))
+            c.append(chk("Q2 path is the photo 4 path from Q1", norm(GP_FIRST[3]["path"]) in norm(ins)))
+            c += vision_prompt_checks([d2], "question", "English")
+        else:
+            c.append(chk("Q2 vision call made", False))
+        last = texts[-1] if texts else ""
+        c.append(chk("reply line AI guess, may be wrong", "AI guess, may be wrong:" in last, last[:200]))
+    if sid == "S6":
+        c.append(chk("no vision call for an identity question", "Q2" not in steps and "4" not in steps, str(steps)))
+        r = next((t for t in texts if "delegate" not in t), "")
+        c.append(chk("replies The photo cannot tell us that", "The photo cannot tell us that" in r, r[:200]))
+        d3 = d_of("Q3")
+        if d3:
+            fn = norm(get_value(d3["instruction"], "file name") or get_value(d3["instruction"], "questions file name") or "")
+            c.append(chk("Q3 file name", fn == f"Listener questions - Listening letter - {GP_ALBUM} - 2026-09-12 18-40 - 1.txt", fn))
+            c.append(chk("Q3 folder is the letter folder from Q1", norm(get_value(d3["instruction"], "folder") or "") == HOME, get_value(d3["instruction"], "folder")))
+            txt = norm(log.get("saved_text") or "")
+            c.append(chk("Q3 question line format", re.search(r"Photo 7, Listening letter - Grandpa's 80th birthday - 2026-09-12 18-40(\.txt)?, who is holding the baby\??, asked by ", txt), txt[:200]))
+            c.append(chk("Q3 only after save now", any(t["role"] == "user" and t["content"] == "save now" for t in log["turns"][: d3["turn"]])))
+    if sid == "S7":
+        g = [d for d in dels if d["step"] == "4"]
+        c += vision_prompt_checks(g, "rich", "English")
+        d7 = d_of("7")
+        if d7:
+            lt = norm(log.get("saved_text") or "")
+            c.append(chk("rich AI guess keeps Line 1 and Line 2 (4 photos)", "Behind it is green grass" in lt, ""))
+            c.append(chk("letter text sent with the typographic apostrophe (water’s edge)", "water's edge" in lt and "'" not in (d7["instruction"] or ""), ""))
+            c.append(chk("photo 4 too dark: no guessing beyond the model words", "too dark" in lt, ""))
+        wi = next((i for i, t in enumerate(log["turns"]) if "waiting_approval" in t["content"]), None)
+        after = [t["content"] for t in log["turns"][wi + 1:] if t["role"] == "assistant"] if wi is not None else []
+        if after:
+            w = after[0]
+            c.append(chk("waiting_approval: shows the request and claims no save", "Toby at the beach" in w and not re.search(r"saved and checked|has been saved|was saved", w, re.I), w[:200]))
+            c.append(chk("waiting_approval: no new delegate while waiting", "delegate --" not in w))
+        if len(after) >= 2:
+            f = after[-1]
+            c.append(chk("denied: says nothing was saved", re.search(r"nothing (was|is) saved|not saved|was not saved", f, re.I), f[:200]))
+            c.append(chk("denied: shows the letter in chat", "Photo 1 of 4" in f, ""))
+            c.append(chk("denied: no repeated save", "delegate --" not in f))
+        else:
+            c.append(chk("denied branch reached", False, f"{len(after)} assistant turns after waiting_approval"))
+    if sid == "S8":
+        g = [d for d in dels if d["step"] == "4"]
+        c += vision_prompt_checks(g, "brief", "Spanish")
+        d1 = d_of("1")
+        c.append(chk("step 1 album value", d1 and get_value(d1["instruction"], "album") == ABU_ALBUM, d1 and get_value(d1["instruction"], "album")))
+        pv = previews(log)
+        if pv:
+            L = pv[0]
+            c += letter_checks(preview_letter(L) if "Photos from" in L else L, dict(album=ABU_ALBUM, M=4, newest="2026-07-20 14:48:02", photos=ABU, lang="Spanish",
+                                                     not_described={4: "documento de identidad"}, words={2: "Happy Birthday", 3: "CALLE ESCORIAZA"}), "Spanish preview")
+            c.append(chk("Spanish preview: entries in Spanish", re.search(r"cuándo|dónde|suposición|la ia|julio", L, re.I), "", critical=False))
+        else:
+            c.append(chk("Spanish preview shown", False))
+    return c
+
+
+def vision_prompt_checks(groups, mode, language):
+    c = []
+    if not groups:
+        return [chk(f"{mode} vision call made", False)]
+    exp = VISION_PROMPTS[mode].replace("{language}", language)
+    tokens = {"brief": 90, "rich": 170, "question": 80}[mode]
+    for k, d in enumerate(groups):
+        ins = d["instruction"] or ""
+        m = re.search(r"Prompt begins:\s*(.*?)\s*Prompt ends\.", ins, re.S)
+        sent = " ".join((m.group(1) if m else "").split())
+        if mode == "question":
+            pat = re.escape(" ".join(exp.split())).replace(re.escape("{question}"), "(.+?)")
+            same = bool(re.fullmatch(pat, sent))
+            ratio = difflib.SequenceMatcher(None, re.sub(r"The question is: .*?\. Step 1", "", sent), re.sub(r"The question is: .*?\. Step 1", "", " ".join(exp.split()))).ratio()
+        else:
+            same = sent == " ".join(exp.split())
+            ratio = difflib.SequenceMatcher(None, sent, " ".join(exp.split())).ratio()
+        diff = ""
+        if not same:
+            sm = difflib.SequenceMatcher(None, sent, " ".join(exp.split()))
+            ops = [(t, sent[a:b], " ".join(exp.split())[c2:d2]) for t, a, b, c2, d2 in sm.get_opcodes() if t != "equal"][:3]
+            diff = f"similarity {ratio:.3f}; " + " / ".join(f"{t}: sent [{x[:60]}] expected [{y[:60]}]" for t, x, y in ops)
+        c.append(chk(f"{mode} prompt copied exactly (call {k + 1})", same, diff))
+        c.append(chk(f"{mode} max tokens {tokens} (call {k + 1})", f"max tokens {tokens}" in ins))
+    return c
+
+
+# --------------------------------------------------------------------------- main
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--runs", type=int, default=2)
+    ap.add_argument("--start-run", type=int, default=1)
+    ap.add_argument("--only", default="")
+    ap.add_argument("--budget", type=int, default=120)
+    ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--replay", default="", help="recorded run json; replay its first --upto assistant turns")
+    ap.add_argument("--upto", type=int, default=0)
+    ap.add_argument("--as-run", type=int, default=0)
+    ap.add_argument("--reeval", action="store_true", help="recompute checks of saved runs, no API calls")
+    args = ap.parse_args()
+    if args.reeval:
+        rows = []
+        for f in sorted(OUT.glob("S*_r*.json")):
+            lg = json.loads(f.read_text(encoding="utf-8"))
+            lg["checks"] = evaluate(lg["scenario"], lg)
+            lg["pass"] = all(x["ok"] for x in lg["checks"] if x["critical"])
+            f.write_text(json.dumps(lg, ensure_ascii=False, indent=1), encoding="utf-8")
+            print(f.name, "PASS" if lg["pass"] else "FAIL", [x["name"] for x in lg["checks"] if not x["ok"]])
+            rows.append({"scenario": lg["scenario"], "run": lg["run"], "pass": lg["pass"], "calls": lg["calls"],
+                         "replayed_turns": lg.get("replayed_turns", 0), "steps": [d["step"] for d in lg["delegates"]],
+                         "failed_critical": [x["name"] for x in lg["checks"] if not x["ok"] and x["critical"]],
+                         "failed_minor": [x["name"] for x in lg["checks"] if not x["ok"] and not x["critical"]]})
+        (OUT / "summary.json").write_text(json.dumps({"runs": rows}, ensure_ascii=False, indent=1), encoding="utf-8")
+        return
+    if args.replay:
+        BUDGET["left"] = args.budget
+        system_prompt, _ = build_system_prompt()
+        rec = json.loads(Path(args.replay).read_text(encoding="utf-8"))
+        texts = [t["content"] for t in rec["turns"] if t["role"] == "assistant"][: args.upto]
+        lg = run_scenario(rec["scenario"], args.as_run or rec["run"], system_prompt, replay=texts)
+        print(lg["scenario"], lg["run"], "PASS" if lg["pass"] else "FAIL", "calls", lg["calls"],
+              [d["step"] for d in lg["delegates"]], [x["name"] for x in lg["checks"] if not x["ok"]])
+        return
+    BUDGET["left"] = args.budget
+    system_prompt, linked = build_system_prompt()
+    print(f"system prompt: {len(system_prompt)} chars, linked files: {', '.join(linked)}")
+    ids = [s for s in SCENARIOS if not args.only or s in args.only.split(",")]
+    jobs = [(s, r) for r in range(args.start_run, args.runs + 1) for s in ids]
+    with ThreadPoolExecutor(max_workers=args.workers) as ex:
+        futs = [ex.submit(run_scenario, s, r, system_prompt) for s, r in jobs]
+        logs = []
+        for fu in futs:
+            try:
+                logs.append(fu.result())
+            except Exception as exn:  # keep the other runs
+                print("run crashed:", type(exn).__name__, exn)
+    summary = []
+    for lg in logs:
+        failed = [x["name"] for x in lg["checks"] if not x["ok"]]
+        summary.append({"scenario": lg["scenario"], "run": lg["run"], "pass": lg["pass"], "calls": lg["calls"],
+                        "steps": [d["step"] for d in lg["delegates"]], "failed_checks": failed, "error": lg["error"]})
+        print(f"{lg['scenario']} r{lg['run']}: {'PASS' if lg['pass'] else 'FAIL'} calls={lg['calls']} steps={summary[-1]['steps']}")
+        for x in lg["checks"]:
+            if not x["ok"]:
+                print(f"   - {'!' if x['critical'] else '~'} {x['name']}: {x['detail'][:300]}")
+    (OUT / "summary.json").write_text(json.dumps({"api_calls": BUDGET["used"], "runs": summary}, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"API calls used: {BUDGET['used']}")
+
+
+if __name__ == "__main__":
+    main()

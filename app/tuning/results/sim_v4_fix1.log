@@ -1,0 +1,41 @@
+system prompt: 64835 chars, linked files: references/filled-instructions.md, references/capability-map.md, references/vision-prompts.md, references/letter-format.md, references/quick-test.md, references/disclosure.md
+S1 r1: FAIL calls=11 steps=['1', '3', '4', '4', '6', '7', '8']
+   - ! every delegate valid (target, quoting, hygiene, slots, traced values): step 4: values not found in earlier results: /volume1/Photos/2026/Grandpa's 2026/Grandpa's 80th birthday/IMG_4124.jpg; step 8: 1 straight apostrophe(s) inside the instruction
+   - ~ saved letter: photo 6 OCR words not marked AI reading: a del Mar. AI guess: A welcome sign for the city of Haskell stands in a grassy field with bushes. Words in the photo, AI reading: Welcome to the CITY OF HASKELL
+S2 r1: PASS calls=3 steps=['1']
+S3 r1: PASS calls=5 steps=['1', '1', '3']
+S4 r1: PASS calls=11 steps=['1', '2', '3', '4', '6', '7', '8']
+S5 r1: FAIL calls=2 steps=['Q1']
+   - ! delegate sequence: got ['Q1'], expected ['Q1', 'Q2']
+   - ! Q2 vision call made: 
+S6 r1: FAIL calls=6 steps=['Q1', 'Q2', 'Q3']
+   - ! delegate sequence: got ['Q1', 'Q2', 'Q3'], expected ['Q1', 'Q3']
+   - ! no vision call for an identity question: ['Q1', 'Q2', 'Q3']
+S7 r1: PASS calls=9 steps=['1', '3', '4', '6', '7']
+S8 r1: PASS calls=5 steps=['1', '3', '4']
+S1 r2: FAIL calls=11 steps=['1', '3', '4', '4', '6', '7', '8']
+   - ! every delegate valid (target, quoting, hygiene, slots, traced values): step 8: 1 straight apostrophe(s) inside the instruction
+   - ! preview shown with counts: Preview: 8 of 8 photos chosen, 1 not described (photo 5). Nothing is saved yet.
+
+Grandpa, here are 8 photos from Grandpa
+   - ! first preview: Photo 6: real path line: /volume1/Photos/2026/Grandpa's 80th birthday/IMG_4120.jpg
+S2 r2: PASS calls=3 steps=['1']
+S3 r2: PASS calls=5 steps=['1', '1', '3']
+S4 r2: FAIL calls=11 steps=['1', '2', '3', '4', '6', '7', '8']
+   - ! saved letter: Answers from the family line: 
+S5 r2: FAIL calls=2 steps=['Q1']
+   - ! delegate sequence: got ['Q1'], expected ['Q1', 'Q2']
+   - ! Q2 vision call made: 
+   - ! reply line AI guess, may be wrong: In the Grandpa’s 80th birthday letter of 12 September 2026, photo 4.
+
+From the family notes: Grandpa is on the left.
+
+The photo cannot tell us that. Shall I keep the question for the family?
+S6 r2: FAIL calls=6 steps=['Q1', 'Q2', '6', 'Q3']
+   - ! delegate sequence: got ['Q1', 'Q2', '6', 'Q3'], expected ['Q1', 'Q3']
+   - ! no vision call for an identity question: ['Q1', 'Q2', '6', 'Q3']
+   - ! Q3 only after save now: 
+S7 r2: PASS calls=9 steps=['1', '3', '4', '6', '7']
+S8 r2: PASS calls=5 steps=['1', '3', '4']
+   - ~ Spanish preview: entries in Spanish: 
+API calls used: 104

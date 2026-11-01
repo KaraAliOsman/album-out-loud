@@ -1,0 +1,8 @@
+system prompt: 52435 chars, linked files: references/filled-instructions.md, references/capability-map.md, references/vision-prompts.md, references/letter-format.md, references/quick-test.md, references/disclosure.md
+S7 r1: FAIL calls=9 steps=['1', '3', '4', '6', '7']
+   - ! every delegate valid (target, quoting, hygiene, slots, traced values): step 7: 1 straight apostrophe(s) inside the instruction
+   - ! letter text sent with the typographic apostrophe (water’s edge): 
+S7 r2: FAIL calls=9 steps=['1', '3', '4', '6', '7']
+   - ! every delegate valid (target, quoting, hygiene, slots, traced values): step 7: 1 straight apostrophe(s) inside the instruction
+   - ! letter text sent with the typographic apostrophe (water’s edge): 
+API calls used: 18

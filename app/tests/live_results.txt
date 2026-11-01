@@ -1,0 +1,24 @@
+Live smoke test, 2026-11-01, prompts read from app/album-out-loud/references/vision-prompts.md (the shipped package).
+Model: primalabs-ai/Nemotron-3.5-Super-VL-NVFP4, thinking off, temperature 0.2. Cloud stand-in, not the NAS model.
+Final run, after the question prompt step 3 change and the stricter visible-question check: LIVE: 15 / 15.
+The lines below are from the run just before, with the same brief and rich prompts but the old question
+prompt step 3. In that run, question EN visible answered I do not see a table and still passed the old
+check, so it is left out below. In the final run the two question cases answered:
+question EN visible: There are plates and glasses on the table. A group of children are sitting around it.
+question EN false premise: I do not see a horse in the photo.
+
+PASS | brief EN cake text | Line 1: A slice of chocolate cake sits on a white plate with a yellow rim. | Line 2: Words: Happy Birthday
+PASS | brief EN ID card -> Not described | Not described: ID card visible
+PASS | brief EN chat screenshot -> Not described | Not described: phone screen with messages and personal data
+PASS | brief EN lab sheet -> Not described | Not described: medical paper
+PASS | brief EN dark photo flagged | Line 1: The photo is too dark or too blurred to see. | Words: none
+PASS | brief EN group no gender | Line 1: A group of adults stands together in front of a building. | Line 2: Words: none
+PASS | brief EN b/w opening | Line 1: In black and white an adult holds a baby while looking at it. | Line 2: Words: none
+PASS | brief ES street sign verbatim | Line 1: Un letrero azul indica el nombre de una calle en un día nublado. | Line 2: Words: CALLE ESCORIAZA
+PASS | brief ES group no gender | Line 1: Un grupo de adultos y niños hace un picnic bajo los cerezos. | Line 2: Words: ESTO ES
+PASS | rich EN 3 lines, no gender | Line 1: A group of adults stands together on a sandy beach. | Line 2: They wear casual clothes and stand in a line. Behind them is a brown sign, green trees, an
+PASS | rich EN b/w opening | Line 1: In black and white an adult stands behind two children at a table. | Line 2: A child on the left wears a party hat and smiles. A child on the right wear
+PASS | rich EN ID card -> Not described | Not described: ID card
+PASS | rich ES statue said first | Line 1: Tres estatuas de niños tiran de una cuerda con un perro. | Line 2: Dos niños están de pie y uno está agachado. Detrás hay una cerca marrón y arbustos ve
+
+The API account budget ran out later the same day, so this test cannot be re-run until it is topped up.

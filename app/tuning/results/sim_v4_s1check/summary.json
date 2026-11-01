@@ -1,0 +1,71 @@
+{
+ "api_calls": 40,
+ "runs": [
+  {
+   "scenario": "S4",
+   "run": 1,
+   "pass": false,
+   "calls": 11,
+   "steps": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6",
+    "7",
+    "8"
+   ],
+   "failed_checks": [
+    "saved letter: photo files section is last"
+   ],
+   "error": null
+  },
+  {
+   "scenario": "S7",
+   "run": 1,
+   "pass": true,
+   "calls": 9,
+   "steps": [
+    "1",
+    "3",
+    "4",
+    "6",
+    "7"
+   ],
+   "failed_checks": [],
+   "error": null
+  },
+  {
+   "scenario": "S4",
+   "run": 2,
+   "pass": true,
+   "calls": 11,
+   "steps": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6",
+    "7",
+    "8"
+   ],
+   "failed_checks": [],
+   "error": null
+  },
+  {
+   "scenario": "S7",
+   "run": 2,
+   "pass": true,
+   "calls": 9,
+   "steps": [
+    "1",
+    "3",
+    "4",
+    "6",
+    "7"
+   ],
+   "failed_checks": [],
+   "error": null
+  }
+ ]
+}

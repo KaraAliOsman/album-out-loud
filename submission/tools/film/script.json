@@ -1,0 +1,129 @@
+[
+  {
+    "id": "open",
+    "kind": "gap",
+    "d": 2.2
+  },
+  {
+    "id": "n1",
+    "kind": "nar",
+    "pre": 0.0,
+    "text": "So, imagine you can't see anymore. Like, at all. This is what your family album sounds like.",
+    "say": "So... [pause] imagine you can't see anymore. Like, at all. [pause] This is what your family album sounds like."
+  },
+  {
+    "id": "sr1",
+    "kind": "sr",
+    "pre": 0.7,
+    "text": "Image. IMG_4031.JPG"
+  },
+  {
+    "id": "n2",
+    "kind": "nar",
+    "pre": 1.0,
+    "text": "Yeah. A phone app does... a little better.",
+    "say": "[sighs] Yeah. A phone app does... a little better."
+  },
+  {
+    "id": "sr2",
+    "kind": "sr",
+    "pre": 0.5,
+    "text": "A slice of chocolate cake on a plate."
+  },
+  {
+    "id": "n3",
+    "kind": "nar",
+    "pre": 0.9,
+    "text": "But it can't tell you whose cake that was. Or which birthday. Or, you know... why it mattered. Only your family knows that.",
+    "say": "But it can't tell you whose cake that was. Or which birthday. Or, you know... why it mattered. [pause] Only your family knows that."
+  },
+  {
+    "id": "n4",
+    "kind": "nar",
+    "pre": 0.6,
+    "text": "So I thought, okay... what if the family just writes it with you? Like a letter you can listen to. With your own screen reader.",
+    "say": "So I thought, okay... what if the family just writes it with you? Like a letter you can listen to. With your own screen reader."
+  },
+  {
+    "id": "sr3",
+    "kind": "sr",
+    "pre": 0.8,
+    "text": "Photo 2 of 8. When: 14 June 2026, 7:52 in the evening. Where: Valparaiso. Family says: your birthday cake from the corner bakery, chocolate as always. AI guess: a slice of chocolate cake on a white plate. Words in the photo: Happy Birthday."
+  },
+  {
+    "id": "n5",
+    "kind": "nar",
+    "pre": 1.0,
+    "text": "This is Album Out Loud. It's a Skill for the UGREEN AI NAS.",
+    "say": "[confident] This is Album Out Loud. It's a Skill for the UGREEN AI NAS."
+  },
+  {
+    "id": "n6",
+    "kind": "nar",
+    "pre": 0.5,
+    "text": "And the core idea is actually really simple. Every line says where it came from. Family first. The machine's guess goes last... and it admits it's a guess.",
+    "say": "And the core idea is actually really simple. Every line says where it came from. Family first. The machine's guess goes last... [chuckles] and it admits it's a guess."
+  },
+  {
+    "id": "n7",
+    "kind": "nar",
+    "pre": 1.0,
+    "text": "How it works. A helper asks Uliya for a letter. Then, on the NAS, the Skill finds the album, picks a few photos, and asks the vision model for a short... careful guess.",
+    "say": "How it works. A helper asks Uliya for a letter. Then, on the NAS, the Skill finds the album, picks a few photos, and asks the vision model for a short... careful guess."
+  },
+  {
+    "id": "n8",
+    "kind": "nar",
+    "pre": 0.4,
+    "text": "Then the family adds the stuff only they know. And nothing gets saved until the helper reads it, and says: save.",
+    "say": "Then the family adds the stuff only they know. And nothing gets saved until the helper reads it, and says: save."
+  },
+  {
+    "id": "n9",
+    "kind": "nar",
+    "pre": 1.0,
+    "text": "ID cards, chats, medical papers? Never described. Period.",
+    "say": "[serious] ID cards, chats, medical papers? Never described. Period."
+  },
+  {
+    "id": "n10",
+    "kind": "nar",
+    "pre": 0.5,
+    "text": "Names come from the family. Never from a face.",
+    "say": "Names come from the family. Never from a face."
+  },
+  {
+    "id": "n11",
+    "kind": "nar",
+    "pre": 0.5,
+    "text": "Okay, this is my favorite part. When she asks who someone is, the question goes back to the family... and the answer shows up in the next letter.",
+    "say": "[excited] Okay, this is my favorite part. When she asks who someone is, the question goes back to the family... and the answer shows up in the next letter."
+  },
+  {
+    "id": "n12",
+    "kind": "nar",
+    "pre": 1.0,
+    "text": "So, where are we today? Zero diagnostics on the official checker. 23 out of 24 clean dry runs, with a stand-in model. Next step: a real UGREEN NAS.",
+    "say": "So, where are we today? Zero diagnostics on the official checker. Twenty-three out of twenty-four clean dry runs, with a stand-in model. [pause] Next step... a real UGREEN NAS."
+  },
+  {
+    "id": "n13",
+    "kind": "nar",
+    "pre": 1.2,
+    "text": "You're seeing this photo for the first time.",
+    "say": "[softly] You're seeing this photo for the first time."
+  },
+  {
+    "id": "n14",
+    "kind": "nar",
+    "pre": 1.6,
+    "text": "She never will. But now... she can hear it.",
+    "say": "[quietly] She never will. [pause] But now... she can hear it."
+  },
+  {
+    "id": "end",
+    "kind": "gap",
+    "pre": 0.6,
+    "d": 9.0
+  }
+]

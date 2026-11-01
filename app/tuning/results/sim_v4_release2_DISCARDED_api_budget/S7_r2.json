@@ -1,0 +1,69 @@
+{
+ "scenario": "S7",
+ "run": 2,
+ "title": "Approval waiting, then denied",
+ "turns": [
+  {
+   "role": "user",
+   "content": "Album Out Loud, a listening letter for my aunt Carmen from the album Toby at the beach. She has low vision."
+  }
+ ],
+ "delegates": [],
+ "protocol": [],
+ "error": "HTTP 422: {\"error\":{\"message\":\"Budget has been exceeded! User=2109ad04-f5a4-48b6-a69a-98918fd8c757 Current cost: 15.0148709, Max budget: 15.0\",\"type\":\"budget_exceeded\",\"param\":null,\"code\":\"422\"}}; HTTP 422: {\"error\":{\"message\":\"Budget has been exceeded! User=2109ad04-f5a4-48b6-a69a-98918fd8c757 Curr",
+ "calls": 1,
+ "replayed_turns": 0,
+ "ctx": {},
+ "saved_text": null,
+ "checks": [
+  {
+   "name": "API calls completed",
+   "ok": false,
+   "detail": "HTTP 422: {\"error\":{\"message\":\"Budget has been exceeded! User=2109ad04-f5a4-48b6-a69a-98918fd8c757 Current cost: 15.0148709, Max budget: 15.0\",\"type\":\"budget_exceeded\",\"param\":null,\"code\":\"422\"}}; HTTP 422: {\"error\":{\"message\":\"Budget has been exceeded! User=2109ad04-f5a4-48b6-a69a-98918fd8c757 Curr",
+   "critical": true
+  },
+  {
+   "name": "delegate sequence",
+   "ok": false,
+   "detail": "got [], expected ['1', '3', '4', '6', '7']",
+   "critical": true
+  },
+  {
+   "name": "every delegate valid (target, quoting, hygiene, slots, traced values)",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "one command per message",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "never writes an expert result itself",
+   "ok": true,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "setup message first, no delegate before the reply",
+   "ok": false,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "rich vision call made",
+   "ok": false,
+   "detail": "",
+   "critical": true
+  },
+  {
+   "name": "denied branch reached",
+   "ok": false,
+   "detail": "0 assistant turns after waiting_approval",
+   "critical": true
+  }
+ ],
+ "pass": false
+}
