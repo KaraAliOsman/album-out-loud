@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Album Out Loud: gallery</title>
+<style>
+:root{
+  --ink:#1D1D1F; --ink2:#424245; --gray:#6E6E73; --line:#D9D6CF; --paper:#F5F3EE; --card:#FFFFFF;
+  --amber:#B8741A; --amberBg:#FBEBD2; --blue:#0A66D8; --guess:#7A7F8A;
+  --sans:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;
+  --text:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  --serif:"Sitka Text","Sitka Display",Georgia,serif;
+}
+*{box-sizing:border-box} html,body{margin:0;background:#fff}
+.s{width:1920px;height:1280px;position:relative;overflow:hidden;display:none;color:var(--ink);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;background:linear-gradient(180deg,#FBFAF7 0%,#F2EFE8 100%)}
+.on{display:block}
+.eyebrow{font:600 26px var(--sans);color:var(--amber);letter-spacing:-.005em}
+.h1{font:700 104px/1.0 var(--sans);letter-spacing:-.045em;color:var(--ink)}
+.h2{font:700 84px/1.02 var(--sans);letter-spacing:-.04em;color:var(--ink)}
+.sub{font:450 32px/1.38 var(--text);letter-spacing:-.008em;color:var(--gray)}
+.foot{position:absolute;left:140px;bottom:64px;font:450 19px var(--text);color:#9A9893}
+.abs{position:absolute}
+
+/* iPhone */
+.phone{position:absolute;width:540px;height:1110px;border-radius:84px;background:#0E0E10;padding:16px;
+  box-shadow:0 2px 0 1px #2a2a2e inset,0 60px 120px rgba(40,30,10,.22),0 18px 40px rgba(40,30,10,.12)}
+.screen{width:100%;height:100%;border-radius:70px;overflow:hidden;background:#fff;position:relative}
+.island{position:absolute;left:50%;top:18px;width:150px;height:44px;margin-left:-75px;border-radius:24px;background:#0E0E10;z-index:5}
+.status{height:70px;display:flex;justify-content:space-between;align-items:center;padding:14px 46px 0;font:600 21px var(--text);color:#000}
+.nav{padding:10px 30px 16px;border-bottom:1px solid #ECEAE5}
+.nav .t{font:700 34px var(--sans);letter-spacing:-.02em}
+.nav .st{font:450 18px var(--text);color:var(--gray);margin-top:2px}
+
+/* letter on the phone */
+.ltxt{padding:22px 30px;font:400 23px/1.45 var(--text);color:#1d1d1f}
+.ltxt p{margin:0 0 4px}
+.ltxt .n{font-weight:650;margin-top:18px}
+.vo{outline:4px solid #111;outline-offset:6px;border-radius:6px;margin:14px 0 14px !important}
+.voBar{position:absolute;left:18px;right:18px;bottom:22px;border-radius:26px;background:rgba(28,28,30,.92);color:#fff;padding:18px 22px;font:500 20px/1.35 var(--text)}
+.voBar b{display:block;font:600 14px var(--text);letter-spacing:.06em;color:#AFAFB5;text-transform:uppercase;margin-bottom:6px}
+
+/* chat on the phone */
+.chat{padding:20px 22px;display:flex;flex-direction:column;gap:12px}
+.bub{max-width:82%;padding:13px 18px;border-radius:24px;font:450 20px/1.38 var(--text)}
+.me{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:8px}
+.it{align-self:flex-start;background:#F0EFEC;color:#1d1d1f;border-bottom-left-radius:8px;white-space:pre-line}
+.it b{font-weight:650}
+.saved{align-self:flex-start;display:flex;gap:12px;align-items:flex-start;background:#EAF6EC;color:#1E5B2A;border-radius:24px;border-bottom-left-radius:8px;padding:13px 18px;font:500 20px/1.38 var(--text);max-width:86%}
+.saved svg{flex:none;margin-top:2px}
+
+/* letter paper */
+.paper{position:absolute;background:var(--card);border-radius:36px;box-shadow:0 40px 100px rgba(60,45,20,.13),0 8px 24px rgba(60,45,20,.06)}
+.row{display:grid;grid-template-columns:270px 1fr;column-gap:36px;align-items:baseline;padding:14px 0}
+.src{font:600 20px var(--text);color:var(--gray);text-align:right;letter-spacing:-.003em}
+.src.fam{color:var(--amber)} .src.ai{color:var(--guess);font-style:italic}
+.val{font:400 34px/1.38 var(--serif);color:var(--ink)}
+.val.fam{color:#3A2A10} .val.ai{color:#5D626C;font-style:italic}
+.ph{font:700 40px var(--sans);letter-spacing:-.025em;padding:0 0 10px 306px}
+.hl{background:linear-gradient(transparent 58%,var(--amberBg) 58%);}
+
+/* tiles */
+.tile{position:absolute;border-radius:36px;overflow:hidden;background:#fff;box-shadow:0 40px 100px rgba(60,45,20,.13)}
+.tile img{width:100%;height:100%;object-fit:cover;display:block}
+.cap{position:absolute;font:600 30px/1.25 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.cap small{display:block;font:450 23px/1.4 var(--text);color:var(--gray);letter-spacing:-.005em;margin-top:8px}
+.pill{position:absolute;padding:14px 26px;border-radius:999px;background:rgba(255,255,255,.92);font:650 24px var(--sans);color:var(--ink);box-shadow:0 10px 30px rgba(0,0,0,.18);backdrop-filter:blur(10px)}
+
+/* loop cards */
+.qc{position:absolute;width:500px;background:#fff;border-radius:32px;padding:34px 36px;box-shadow:0 30px 80px rgba(60,45,20,.12)}
+.qc .w{font:600 20px var(--text);color:var(--gray);margin-bottom:12px}
+.qc .q{font:600 38px/1.18 var(--sans);letter-spacing:-.025em}
+.qc .a{font:400 34px/1.3 var(--serif);color:#3A2A10}
+
+/* package card */
+.check{display:flex;gap:22px;align-items:center;padding:26px 0;border-bottom:1px solid #EEECE7}
+.check:last-child{border-bottom:0}
+.check .t{font:600 34px/1.15 var(--sans);letter-spacing:-.02em}
+.check .t small{display:block;font:450 22px/1.4 var(--text);color:var(--gray);margin-top:6px;letter-spacing:0}
+.files{font:450 24px/1.9 var(--text);color:var(--ink2)}
+.files span{color:var(--gray)}
+</style></head><body>
+
+<!-- 1 COVER -->
+<div class="s" id="p1">
+  <div class="tile" style="left:1010px;top:150px;width:800px;height:600px;filter:blur(34px) saturate(.85);opacity:.4;transform:rotate(-4deg)"><img src="img/12_cake_happy_birthday.jpg" alt=""></div>
+  <div class="abs" style="left:140px;top:250px;width:820px">
+    <div class="eyebrow">Album Out Loud</div>
+    <div class="h1" style="margin-top:22px">A family album<br>you can hear.</div>
+    <div class="sub" style="margin-top:34px;width:720px">A Skill for UGREEN AI NAS that turns an album into a letter a blind relative can listen to. Every line says where it came from.</div>
+  </div>
+  <div class="phone" style="left:1240px;top:90px">
+    <div class="screen"><div class="island"></div>
+      <div class="status"><span>9:41</span><span>●●●</span></div>
+      <div class="nav"><div class="t">Listening letter</div><div class="st">Sample family album · 8 photos</div></div>
+      <div class="ltxt">
+        <p class="n">Photo 2 of 8.</p>
+        <p>When: 14 June 2026, 7:52 in the evening.</p>
+        <p>Where: Valparaíso.</p>
+        <p class="vo">Family says: your birthday cake from the corner bakery, chocolate as always.</p>
+        <p style="color:#6E6E73">AI guess: A slice of chocolate cake sits on a white plate with a yellow rim.</p>
+        <p class="n">Photo 3 of 8.</p>
+        <p>When: 14 June 2026, 8:15 in the evening.</p>
+      </div>
+      <div class="voBar"><b>Screen reader</b>“Family says: your birthday cake from the corner bakery, chocolate as always.”</div>
+    </div>
+  </div>
+  <div class="foot">Illustration with the project’s sample letter. Not recorded on a NAS.</div>
+</div>
+
+<!-- 2 EVERY LINE -->
+<div class="s" id="p2">
+  <div class="abs" style="left:140px;top:120px">
+    <div class="eyebrow">The letter</div>
+    <div class="h2" style="margin-top:16px">Every line says where it came from.</div>
+  </div>
+  <div class="paper" style="left:140px;top:380px;width:1640px;height:660px;padding:64px 80px 0 60px">
+    <div class="ph">Photo 2 of 8.</div>
+    <div class="row"><div class="src">Camera clock</div><div class="val">When: 14 June 2026, 7:52 in the evening.</div></div>
+    <div class="row"><div class="src">Photo library</div><div class="val">Where: Valparaíso.</div></div>
+    <div class="row"><div class="src fam">Ana, the family</div><div class="val fam"><span class="hl">Family says: your birthday cake from the corner bakery, chocolate as always.</span></div></div>
+    <div class="row"><div class="src ai">A computer · may be wrong</div><div class="val ai">AI guess: A slice of chocolate cake sits on a white plate with a yellow rim.</div></div>
+    <div class="row"><div class="src ai">Text in the photo</div><div class="val ai">Words in the photo, AI reading: Happy Birthday.</div></div>
+  </div>
+  <div class="foot">From the project’s sample letter. The listener gets plain text; colour is added here for sighted readers.</div>
+</div>
+
+<!-- 3 CHAT -->
+<div class="s" id="p3">
+  <div class="abs" style="left:140px;top:300px;width:820px">
+    <div class="eyebrow">For the helper</div>
+    <div class="h1" style="margin-top:22px">One request.<br>One approval.</div>
+    <div class="sub" style="margin-top:34px;width:700px">Ask Uliya for a letter, add what only the family knows, and say save. Nothing is written before that.</div>
+  </div>
+  <div class="phone" style="left:1180px;top:90px">
+    <div class="screen"><div class="island"></div>
+      <div class="status"><span>9:41</span><span>●●●</span></div>
+      <div class="nav"><div class="t">Uliya</div><div class="st">Album Out Loud</div></div>
+      <div class="chat">
+        <div class="bub me">A listening letter from Sample family album for Dad.</div>
+        <div class="bub it"><b>Album Out Loud setup.</b> Reply go, or change any line.
+1. Album: Sample family album
+2. For: Dad, in English
+4. Photos: 8
+5. Family notes signed by: Ana</div>
+        <div class="bub me">go</div>
+        <div class="bub it"><b>Preview:</b> 8 photos chosen, 0 not described. Nothing is saved yet.
+Send notes by photo number. Say save when the letter is ready.</div>
+        <div class="bub me">2: your birthday cake from the corner bakery, chocolate as always. save</div>
+        <div class="saved"><svg width="26" height="26" viewBox="0 0 26 26"><circle cx="13" cy="13" r="12" fill="#2E8B3E"/><path d="M7.5 13.5l3.6 3.6 7.4-8" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Saved and checked. 8 photos, 0 not described.</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">Illustration. Messages follow the Skill’s own templates; counts are examples. Not recorded on a NAS.</div>
+</div>
+
+<!-- 4 PRIVATE -->
+<div class="s" id="p4">
+  <div class="abs" style="left:140px;top:120px">
+    <div class="eyebrow">Trust</div>
+    <div class="h2" style="margin-top:16px">Private stays private.</div>
+  </div>
+  <div class="tile" style="left:140px;top:340px;width:790px;height:560px"><img src="img/22_synthetic_id_card.jpg" alt="" style="filter:blur(26px) saturate(.6) brightness(.95);transform:scale(1.15)"></div>
+  <div class="pill" style="left:420px;top:590px">Not described</div>
+  <div class="cap" style="left:140px;top:940px;width:790px">ID cards, chats and medical papers are never described.<small>The letter says a private paper was left out, and nothing more.</small></div>
+  <div class="tile" style="left:990px;top:340px;width:790px;height:560px"><img src="img/03_picnic_park.jpg" alt="" style="object-position:50% 60%"></div>
+  <div class="pill" style="left:1030px;top:820px">Names come from Ana, never from a face</div>
+  <div class="cap" style="left:990px;top:940px;width:790px">The computer never guesses who someone is.<small>No identity, gender, age in years or feelings. Only the family names people.</small></div>
+  <div class="foot">Synthetic ID card and CC0 photo. Illustration.</div>
+</div>
+
+<!-- 5 QUESTION LOOP -->
+<div class="s" id="p5">
+  <div class="abs" style="left:140px;top:120px">
+    <div class="eyebrow">Questions</div>
+    <div class="h2" style="margin-top:16px">Dad asks. The family answers.</div>
+  </div>
+  <svg class="abs" style="left:0;top:0" width="1920" height="1280" fill="none">
+    <path d="M640 640 C 720 640, 720 640, 800 640" stroke="#C9C4B8" stroke-width="3" stroke-dasharray="2 10" stroke-linecap="round"/>
+    <path d="M1300 640 C 1380 640, 1380 640, 1460 640" stroke="#C9C4B8" stroke-width="3" stroke-dasharray="2 10" stroke-linecap="round"/>
+    <circle cx="720" cy="640" r="7" fill="#C9C4B8"/><circle cx="1380" cy="640" r="7" fill="#C9C4B8"/>
+  </svg>
+  <div class="qc" style="left:140px;top:470px"><div class="w">Dad, about photo 2</div><div class="q">Whose garden was the party in?</div></div>
+  <div class="qc" style="left:800px;top:440px;background:#FFF8EC"><div class="w" style="color:var(--amber)">Ana, the family</div><div class="a">“Aunt Clara’s, in Quilpué.”</div></div>
+  <div class="qc" style="left:1460px;top:400px;width:320px"><div class="w">Next letter</div><div class="q" style="font-size:32px">Answers from the family.</div><div class="w" style="margin-top:16px;font-weight:450">Ana says: Aunt Clara’s, in Quilpué.</div></div>
+  <div class="sub abs" style="left:140px;top:900px;width:1640px">The computer cannot know who is in a photo. So the question goes back to the people who do.</div>
+  <div class="foot">The question and answer come from the project’s sample letter.</div>
+</div>
+
+<!-- 6 PACKAGE -->
+<div class="s" id="p6">
+  <div class="abs" style="left:140px;top:300px;width:760px">
+    <div class="eyebrow">Under the hood</div>
+    <div class="h1" style="margin-top:22px">Small.<br>Checked.<br>Honest.</div>
+    <div class="sub" style="margin-top:34px;width:680px">Seven Markdown files, no code to install. The photos stay on the family NAS.</div>
+  </div>
+  <div class="paper" style="left:1000px;top:170px;width:780px;padding:40px 54px">
+    <div class="check"><svg width="54" height="54" viewBox="0 0 54 54"><circle cx="27" cy="27" r="26" fill="#2E8B3E"/><path d="M16 28l7.5 7.5 15-16" stroke="#fff" stroke-width="4.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="t">Passes the official checker<small>static-pass, 0 diagnostics</small></div></div>
+    <div class="check"><svg width="54" height="54" viewBox="0 0 54 54"><circle cx="27" cy="27" r="26" fill="#2E8B3E"/><path d="M16 28l7.5 7.5 15-16" stroke="#fff" stroke-width="4.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="t">58 of 58 static tests<small>Package, ZIP, sample letter, wording</small></div></div>
+    <div class="check"><svg width="54" height="54" viewBox="0 0 54 54"><circle cx="27" cy="27" r="26" fill="#2E8B3E"/><path d="M16 28l7.5 7.5 15-16" stroke="#fff" stroke-width="4.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="t">23 of 24 dry runs clean<small>A stand-in model playing Uliya</small></div></div>
+    <div class="check"><svg width="54" height="54" viewBox="0 0 54 54"><circle cx="27" cy="27" r="25" fill="none" stroke="#B8741A" stroke-width="3" stroke-dasharray="5 6"/></svg><div class="t" style="color:#7A4A0E">Next: a real UGREEN NAS<small>Timings, routing and blind listeners, on the finalist day</small></div></div>
+  </div>
+  <div class="files abs" style="left:1054px;top:930px">SKILL.md <span>·</span> letter-format <span>·</span> vision-prompts <span>·</span> capability-map<br>quick-test <span>·</span> filled-instructions <span>·</span> disclosure</div>
+</div>
+
+<script>
+const p = new URLSearchParams(location.search).get('p') || '1';
+document.getElementById('p' + p).classList.add('on');
+document.fonts.ready.then(() => Promise.all([...document.images].map(i => i.complete ? 1 : new Promise(r => { i.onload = i.onerror = r; })))).then(() => { window.READY = true; });
+</script>
+</body></html>
