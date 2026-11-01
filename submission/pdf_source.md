@@ -82,6 +82,6 @@ Done: SKILL.md, six references, 0 official checker diagnostics. Prompts tuned wi
 
 Solo entry. I am the only team member and wrote the Skill and this proposal. I agree to the official rules and consent to this submission.
 
-Entrant: ________________________
+Entrant: Ali Osman Kara
 
-Signature: ________________________   Date: ____________
+Signature: /Ali Osman Kara/ (electronic signature)   Date: 1 November 2026
